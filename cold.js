@@ -1,5 +1,4 @@
 //cold.js
-//
 
 (function(){
 	var _cold = {
