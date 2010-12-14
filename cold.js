@@ -66,6 +66,7 @@
 		},
 
 		inc: function(namespace, callback){
+			console.info("including");
 			var url = "";
 			if(Cold.scripts["namespace"] !== "loaded")
 			{
