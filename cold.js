@@ -2,9 +2,14 @@
 
 (function(){
 	var _cold = {
+
 		VERSION: '0.01',
 
-		BaseURL: '',
+		BaseURL: (function(){
+			var scripts = document.getElementsByTagName('script');
+			var str = scripts[scripts.length - 1].getAttribute('src');
+			return str.match(/http:\/\/[^\/]*\//)[0];
+		})(),
 
 		cache: {},
 
@@ -17,7 +22,7 @@
 					obj[p] = exobj[p];
 				}
 				else{
-					throw new Error("pros " + p + " is existed.");
+					throw new Error('pros ' + p + ' is existed.');
 				}
             }
 		},
@@ -27,7 +32,7 @@
 				namesLen = names.length,
 				space = null;
 
-			if(namesLen < 1) throw new Error("namespace wrong.");
+			if(namesLen < 1) throw new Error('namespace wrong.');
 			if(!(names[0] in window)){
 				window[names[0]] = {};
 			}
@@ -66,7 +71,6 @@
 		},
 
 		inc: function(namespace, callback){
-			console.info("including");
 			var url = "";
 			if(Cold.scripts["namespace"] !== "loaded")
 			{
