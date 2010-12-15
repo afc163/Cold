@@ -21,10 +21,6 @@ Cold.add("Cold", function(){
 
 	var _browser = {};
 
-	var _domReady = function(){
-		
-	};
-
 	return {
 		isArray		: _isArray,
 		isFunction	: _isFunction,
@@ -32,6 +28,5 @@ Cold.add("Cold", function(){
 		isNum		: _isNum,
 		isNull		: _isNull,
 		browser		: _browser,
-		domReady	: _domReady
 	};
 });

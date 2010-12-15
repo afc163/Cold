@@ -1,5 +1,5 @@
-Cold.add("Cold.dom",function(){
-	console.log("cold.dom init");
+Cold.add("Cold.dom", function(){
+
 	var _selector = function(){
 		var elems = null;
 		return elems;
