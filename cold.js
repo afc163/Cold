@@ -16,7 +16,10 @@
 		scripts: {'loadingNum' : 0},
 
 		extend: function(obj, exobj, overwrite){
+			obj = obj || {};
+			exobj = exobj || {};
 			overwrite = overwrite || false;
+
 			for(var p in exobj){
 				if(overwrite){
 					obj[p] = exobj[p];
@@ -26,7 +29,7 @@
 						obj[p] = exobj[p];
 					}
 					else{
-						throw new Error("property" + p + "can't be overwrited!");
+						//throw new Error("property " + p + " can't be overwrited!");
 					}
 				}
             }
@@ -66,6 +69,8 @@
 				loaded = false;
 			s.setAttribute('type', 'text/javascript');
 			s.setAttribute('src', url);
+			//for firefox 3.6
+			s.setAttribute('async', true);
 			head.appendChild(s);
 			s.onerror = s.onload = s.onreadystatechange = function(){
 				if(!loaded && (!this.readyState || (/loaded|complete/).test(this.readyState))){
@@ -87,7 +92,7 @@
 					? (Cold.scripts['loadingNum'] += 1) 
 					: (Cold.scripts['loadingNum'] = 1);
 
-				if(!(/component|util|other/g.test(namespace))){
+				if(!(/component|util|task|other/g.test(namespace))){
 					url = namespace.replace('Cold','Cold.core');
 				}
 				url = url.replace(/\./g,'/');
