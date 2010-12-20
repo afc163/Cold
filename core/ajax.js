@@ -1,4 +1,5 @@
 Cold.add("Cold.ajax",function(){
+
 	var _jsonToQuery = function(data){
 		if(typeof data === 'string'){
 			return data;
@@ -10,7 +11,11 @@ Cold.add("Cold.ajax",function(){
 		if(q !== ''){
 			q = q.slice(0, -1);
 		}
-		return q;
+		return q.toLowerCase();
+	};
+
+	var _addQuery = function(url, data){
+		return url + '?' + _jsonToQuery(data);
 	};
 
 	var _getRequest = function(){
@@ -33,8 +38,8 @@ Cold.add("Cold.ajax",function(){
 		async		: true,
 		contentType : 'application/x-www-form-urlencoded',
         charset		: 'utf-8',
-		timeout		: null,
-		returnType	: 'json',	// json | jsonp | script | xml | html | text
+		timeout		: 30 * 1000,
+		returnType	: 'json',	// json | xml | html | text | jsonp & script is undefined
 		onSuccess	: function(){},
 		onError		: function(){}
 	};
@@ -43,36 +48,80 @@ Cold.add("Cold.ajax",function(){
 		if (url == '' || url == null) {
 			throw new Error('ajax need parameter url.');
 		}
-		var XHR = _getRequest();
-		Cold.extend(option, _defaultOption);
+		var XHR = _getRequest(),
+			op = _defaultOption,
+			method;
+		Cold.extend(op, option, true);
+		method = op.method.toLowerCase();
 
 		XHR.onreadystatechange = function(){
 			var data = '';
 			if(XHR.readyState === 4){
 				if(XHR.status === 200 || XHR.status === 0){
-					data = XHR.responseText;
-					option.onSuccess && option.onSuccess(data);
+					switch(op.returnType){
+						case 'text':
+						case 'html':
+							data = XHR.responseText;
+							break;
+						case 'xml':
+							data = XHR.responseXML;
+							break;
+						case 'script':
+							break;
+						case 'jsonp':
+							break;
+						case 'json':
+							data = eval('('+ XHR.responseText +')');
+							break;
+					}
+					op.onSuccess && op.onSuccess(data);
 				}
 				else{
-					option.onError && option.onError();
+					op.onError && op.onError();
 				}
 			}
 		};
-		XHR.open(option.method, url, option.async);
-		XHR.setRequestHeader('Content-Type', option.contentType + ';charset=' + option.charset.toLowerCase());
-		XHR.send(_jsonToQuery(option.data));
+		if(op.data && method === 'get'){
+			op.data['rd'] = new Date().valueOf();
+			url = _addQuery(url, op.data);
+		}
+		XHR.open(method, url, op.async);
+		XHR.setRequestHeader('Content-Type', op.contentType + ';charset=' + op.charset.toLowerCase());
+		XHR.send( (method === 'post') ? _jsonToQuery(data) : null);
+		return XHR;
 	};
 
 	var _get = function(url, option){
 		option = option || {};
 		option['method'] = 'get';
-		_ajax(url, option);
+		return _ajax(url, option);
 	};
 
-	var _post = function(url, data, callback, returnType){
+	var _post = function(url, option){
 		option = option || {};
 		option['method'] = 'post';
-		_ajax(url, option);
+		return _ajax(url, option);
+	};
+
+	var _getJson = function(url, option){
+		option = option || {};
+		option['method'] = 'get';
+		option['returnType'] = 'json';
+		return _ajax(url, option);
+	};
+
+	var _getXml = function(url, option){
+		option = option || {};
+		option['method'] = 'get';
+		option['returnType'] = 'xml';
+		return _ajax(url, option);
+	};
+
+	var _getText = function(url, option){
+		option = option || {};
+		option['method'] = 'get';
+		option['returnType'] = 'text';
+		return _ajax(url, option);
 	};
 	
 	return {
@@ -80,6 +129,10 @@ Cold.add("Cold.ajax",function(){
 		ajax		: _ajax,
 		get			: _get,
 		post		: _post,
+		getJson		: _getJson,
+		getXml		: _getXml,
+		getText		: _getText,
 		jsonToQuery : _jsonToQuery
 	};
+	
 });

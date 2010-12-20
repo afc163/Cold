@@ -29,7 +29,7 @@
 						obj[p] = exobj[p];
 					}
 					else{
-						//throw new Error("property " + p + " can't be overwrited!");
+						throw new Error("property " + p + " can't be overwrited!");
 					}
 				}
             }
@@ -108,6 +108,7 @@
 			}
 		}
 	};
+
 	window["Cold"] = _cold;
 })();
 

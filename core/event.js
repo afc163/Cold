@@ -1,8 +1,13 @@
 Cold.add("Cold.event",function(){
 	//var _eventsList = {};
+	var _id = function(elem){
+		return elem = (typeof elem === 'string') ? document.getElementById(elem) : elem;
+	};
+
 	var _addEvent = function(elem, eventType, func){
-		elem = (typeof elem === 'string') ? document.getElementById(elem) : elem;
+		elem = _id(elem);
 		eventType = eventType || 'click';
+
 		if(!elem || elem.nodeType === 3 || elem.nodeType === 8 || typeof func !== 'function'){
 			return false;
 		}
@@ -20,7 +25,7 @@ Cold.add("Cold.event",function(){
 	};
 
 	var _delEvent = function(elem, eventType, func){
-		elem = (typeof elem === 'string') ? document.getElementById(elem) : elem;
+		elem = _id(elem);
 		eventType = eventType || 'click';
 		if(!elem || elem.nodeType === 3 || elem.nodeType === 8 || typeof func !== 'function'){
 			return false;
@@ -39,7 +44,7 @@ Cold.add("Cold.event",function(){
 	};
 
 	var _fireEvent = function(elem, eventType){
-		elem = (typeof elem === 'string') ? document.getElementById(elem) : elem;
+		elem = _id(elem);
 		eventType = eventType || 'click';
 
 		if(elem.fireEvent){
