@@ -1,14 +1,18 @@
-Cold.add("Cold.event",function(){
+Cold.add('Cold.event', ['Cold.dom'], function(){
+
 	//var _eventsList = {};
+
+	//console.info("event 执行完成。");
+
 	var _id = function(elem){
-		return elem = (typeof elem === 'string') ? document.getElementById(elem) : elem;
+		return elem = Cold.isString(elem) ? document.getElementById(elem) : elem;
 	};
 
 	var _addEvent = function(elem, eventType, func){
 		elem = _id(elem);
 		eventType = eventType || 'click';
 
-		if(!elem || elem.nodeType === 3 || elem.nodeType === 8 || typeof func !== 'function'){
+		if(!elem || elem.nodeType === 3 || elem.nodeType === 8 || !Cold.isFunction(func)){
 			return false;
 		}
 
@@ -27,7 +31,7 @@ Cold.add("Cold.event",function(){
 	var _delEvent = function(elem, eventType, func){
 		elem = _id(elem);
 		eventType = eventType || 'click';
-		if(!elem || elem.nodeType === 3 || elem.nodeType === 8 || typeof func !== 'function'){
+		if(!elem || elem.nodeType === 3 || elem.nodeType === 8 || !Cold.isFunction(func)){
 			return false;
 		}
 

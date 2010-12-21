@@ -1,7 +1,7 @@
 Cold.add("Cold.ajax",function(){
 
 	var _jsonToQuery = function(data){
-		if(typeof data === 'string'){
+		if(Cold.isString(data)){
 			return data;
 		}
 		var q = '';

@@ -1,18 +1,5 @@
-Cold.add("Cold", function(){
+Cold.add("Cold.browser", function(){
 
-	var _type = {};
-	(function(){
-		var _toString = Object.prototype.toString;
-		var objTypes = ['Array', 'Function', 'String', 'Number'];
-		for(var i=0, l=objTypes.length; i<l; i++){
-			(function(i){
-				_type["is" + objTypes[i]] = function(obj){
-					return _toString.call(obj) === '[object ' + objTypes[i] + ']';
-				};
-			})(i);
-		}
-	})();
-	
 	var _ua = navigator.userAgent.toLowerCase();
 	var _browser = {
 		platform: navigator.platform,
@@ -42,12 +29,6 @@ Cold.add("Cold", function(){
 	_browser.ie7 = _browser.msie && parseInt(_browser.version) === 7;
 	_browser.ie8 = _browser.msie && parseInt(_browser.version) === 8;
 
-	return {
-		type		: _type,
-		isArray		: _type.isArray,
-		isFunction	: _type.isFunction,
-		isString	: _type.isString,
-		isNumber	: _type.isNumber,
-		browser		: _browser
-	};
+	return _browser;
+
 });

@@ -1,16 +1,18 @@
 Cold.add('Cold.dom', function(){
 
+	//console.info("dom 执行完成。");
+
 	var _selector = function(){
 		var elems = null;
 		return elems;
 	};
 
 	var _$E = function(str){
-		return typeof str === 'string' ? document.getElementById(str) : str;
+		return Cold.isString(str) ? document.getElementById(str) : str;
 	};
 
 	var _$C = function(str){
-		return typeof str === 'string' ? document.createElement(str) : str;
+		return Cold.isString(str) ? document.createElement(str) : str;
 	};
 
 	var _$CN = function(str, node, tag){
@@ -35,7 +37,7 @@ Cold.add('Cold.dom', function(){
 	};
 
 	var _$T = function(str){
-		return typeof str === 'string' ? document.getElementsByTagName(str) : str;
+		return typeof Cold.isString(str) ? document.getElementsByTagName(str) : str;
 	};
 
 	var _camelize = function(str){
@@ -52,7 +54,7 @@ Cold.add('Cold.dom', function(){
 
 	var _css = function(elem, style, value){
 		elem = _$E(elem);
-		if(typeof style === 'string'){
+		if(Cold.isString(style)){
 			if(!!value) elem.style[style] = value;
 			else		return elem.style[style];
 		}
@@ -67,7 +69,7 @@ Cold.add('Cold.dom', function(){
 
 	var _val = function(elem, prop, value){
 		elem = _$E(elem);
-		if(typeof prop === 'string'){
+		if(Cold.isString(prop)){
 			if(!!value) elem.setAttribute(prop, value);
 			else		return elem.getAttribute(prop);
 		}
@@ -76,6 +78,17 @@ Cold.add('Cold.dom', function(){
 			for(var p in prop){
 				elem.setAttribute(p, prop[p]);
 			}
+		}
+		return elem;
+	};
+
+	var _html = function(elem, value){
+		elem = _$E(elem);
+		if(!!value){
+			elem.innerHTML = value;
+		}
+		else{
+			return elem.innerHTML;
 		}
 		return elem;
 	};
@@ -89,7 +102,8 @@ Cold.add('Cold.dom', function(){
 		$CN		: _$CN,
 		$T		: _$T,
 		css		: _css,
-		val		: _val
+		val		: _val,
+		html	: _html
 	};
 	
 });
