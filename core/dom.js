@@ -1,6 +1,6 @@
 Cold.add('Cold.dom', function(){
 
-	//console.info("dom 执行完成。");
+	console.info("dom 载入完毕。");
 
 	var _selector = function(){
 		var elems = null;

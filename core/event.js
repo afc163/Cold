@@ -1,8 +1,8 @@
-Cold.add('Cold.event', ['Cold.dom'], function(){
+Cold.add('Cold.event', function(){
 
 	//var _eventsList = {};
 
-	//console.info("event 执行完成。");
+	console.info("event 载入完毕。");
 
 	var _id = function(elem){
 		return elem = Cold.isString(elem) ? document.getElementById(elem) : elem;

@@ -15,10 +15,9 @@
 
 		cache: {},
 
-		scripts: {
-			'loadingNum' : 0,
-			'addingList' : []
-		},
+		scripts: {'loadingNum' : 0},
+
+		addingList: [],
 
 		extend: function(obj, exobj, overwrite){
 			obj = obj || {};
@@ -30,12 +29,8 @@
 					obj[p] = exobj[p];
 				}
 				else{
-					if(!obj[p]){
-						obj[p] = exobj[p];
-					}
-					else{
-						throw new Error('obj' + obj + '\'s property ' + p + ' cant be overwrited!');
-					}
+					if(!obj[p])	obj[p] = exobj[p];
+					else		return false;
 				}
             }
 		},
@@ -45,45 +40,63 @@
 				namesLen = names.length,
 				space = window;
 
-			var addFrom = function(func){
-				if(namesLen < 1){
-					throw new Error('namespace wrong.');
-				}
-				if(!(names[0] in window)){
-					window[names[0]] = {};
-				}
+			var func = (function(f){
+				return function(){
+					if(namesLen < 1){
+						throw new Error('namespace wrong.');
+					}
+					if(!(names[0] in window)){
+						window[names[0]] = {};
+					}
+					for(var i = 0; i < namesLen; i++){
+						if(i === namesLen - 1 && typeof f === 'function'){
+							if(space[names[i]])	_cold.extend(space[names[i]], f());
+							else				space[names[i]] = f();
+							break;
+						}
+						if(!space[names[i]]){
+							space[names[i]] = {};
+						}
+						space = space[names[i]];
+					}
+				};
+			})(typeof req === 'function' ? req : callback);
 
-				for(var i = 0; i < namesLen; i++){
-					if(i === namesLen - 1 && typeof func === 'function'){
-						if(space[names[i]]){
-							_cold.extend(space[names[i]], func());
-						}
-						else{
-							space[names[i]] = func();
-						}
-						break;
+			var addingToList = function(){
+				for(var i=0, l=_cold['addingList']; i<l; i++){
+					if(_cold['addingList'][i] == func){
+						return;
 					}
-					if(!space[names[i]]){
-						space[names[i]] = {};
-					}
-					space = space[names[i]];
 				}
-				return _cold;
+				_cold['addingList'].push(func);
 			};
-
 			//check req
 			if(typeof req !== 'function'){
 				var reqNum = req.length;
 				return _cold.load(req, function(){
 					if(--reqNum === 0){
-						return;
+						addingToList();
 					}
-					addFrom(callback);
 				});
 			}
 			else{
-				return addFrom(req);
+				addingToList();
 			}
+			return _cold;
+		},
+
+		exec: function(){
+			var adding = _cold['addingList'].shift();
+			typeof adding === 'function' && adding.call();
+			return _cold;
+		},
+
+		attach: function(){
+			var list = _cold['addingList'], adding;
+			while(adding = list.shift()){
+				typeof adding === 'function' && adding.call();
+			}
+			return _cold;
 		},
 
 		addScript: function(url, onComplete){
@@ -112,9 +125,8 @@
 			var url = namespace,
 				cs = _cold.scripts;
 			
-			if(cs[namespace] !== 'loaded' && cs[namespace] !== 'loading')
-			{
-				cs[namespace] = 'loading';
+			//为了维护依赖的载入顺序，不对正在载入的进行检查，但是这样会造成重复请求，真是头疼
+			if(cs[namespace] !== 'loaded'){
 				cs['loadingNum'] 
 					? (cs['loadingNum'] += 1) 
 					: (cs['loadingNum'] = 1);
@@ -122,15 +134,14 @@
 				if(!(/component|util|task|other/g.test(namespace))){
 					url = namespace.replace(/Cold/i,'Cold.core');
 				}
-				url = url.replace(/\./g,'/');
-				url = _cold.BaseURL + url + '.js';
+				url = _cold.BaseURL + url.replace(/\./g,'/') + '.js';
 				
 				_cold.addScript(url, function(){
-					if(typeof callback === 'function'){
-						callback.call();
-					}
+					typeof callback === 'function' && callback.call();
 					cs[namespace] = 'loaded';
-					cs['loadingNum'] -= 1;
+					if(--cs['loadingNum'] === 0){
+						_cold.attach();
+					}
 				});
 			}
 			else{
@@ -140,11 +151,12 @@
 		},
 
 		load: function(namespace, callback){
+			namespace = namespace || [];
 			if(typeof namespace === 'string'){
 				return _cold.loadSingle(namespace, callback);
 			}
 			else{
-				for(var i=0, len=namespace.length; i<len; i++){
+				for(var i=0, len = namespace.length; i<len; i++){
 					_cold.loadSingle(namespace[i], function(){
 						typeof callback === 'function' && callback.call();
 					});
@@ -256,4 +268,4 @@ Cold.add('Cold', function(){
 		ready		: _ready
 	};
 
-});
+}).exec();
