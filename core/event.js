@@ -2,7 +2,7 @@ Cold.add('Cold.event', function(){
 
 	//var _eventsList = {};
 
-	console.info("event 载入完毕。");
+	//console.info("event 载入完毕。");
 
 	var _id = function(elem){
 		return elem = Cold.isString(elem) ? document.getElementById(elem) : elem;
