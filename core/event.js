@@ -63,8 +63,8 @@ Cold.add('Cold.event', function(){
 	};
 
 	return {
-		addEvent	: _addEvent,
-		delEvent	: _delEvent,
-		fireEvent	: _fireEvent
+		add		: _addEvent,
+		remove	: _delEvent,
+		fire	: _fireEvent
 	};
 });

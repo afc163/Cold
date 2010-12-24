@@ -23,8 +23,8 @@
 		BaseURL: (function(){
 			var scripts = document.getElementsByTagName('script'),
 				str = scripts[scripts.length - 1].getAttribute('src'),
-				httpMatcher = /http:\/\/[^\/]*\//;
-			return (str.match(httpMatcher) || window.location.href.match(httpMatcher))[0];
+				matchStr = /http:\/\/[^\/]*\//;
+			return (str.match(matchStr) || window.location.href.match(matchStr))[0];
 		})(),
 
 		cache: {},
@@ -33,6 +33,8 @@
 			'loadingNum': 0,
 			'nodes'		: {}
 		},
+
+		addingList: [],
 
 		extend: function(obj, exobj, overwrite){
 			obj = obj || {};
@@ -76,17 +78,35 @@
 				};
 			})(typeof req === 'function' ? req : callback);
 
+			var addingToList = function(){
+				_cold['addingList'].push(func);
+			};
+
 			//check req
 			if(typeof req !== 'function'){
 				var reqNum = req.length;
 				return _cold.load(req, function(){
 					if(--reqNum === 0){
-						func();
+						addingToList();
 					}
 				});
 			}
 			else{
-				func();
+				addingToList();
+			}
+			return _cold;
+		},
+
+		exec: function(){
+			var adding = _cold['addingList'].shift();
+			typeof adding === 'function' && adding.call();
+			return _cold;
+		},
+
+		attach: function(){
+			var list = _cold['addingList'], _cold['scripts'] = {}, adding;
+			while(adding = list.shift()){
+				typeof adding === 'function' && adding.call();
 			}
 			return _cold;
 		},
@@ -141,7 +161,9 @@
 				_cold.addScript(getUrl(), function(){
 					typeof callback === 'function' && callback.call();
 					cs[namespace] = 'loaded';
-					cs['loadingNum'] -= 1;
+					if(--cs['loadingNum'] === 0){
+						_cold.attach();
+					}
 				});
 			}
 			return _cold;
@@ -265,4 +287,4 @@ Cold.add('Cold', function(){
 		ready		: _ready
 	};
 
-});
+}).exec();

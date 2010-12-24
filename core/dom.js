@@ -12,21 +12,19 @@ Cold.add('Cold.dom', function(){
 	};
 
 	var _create = function(str, property){
-		var htmlMatcher = /^[\s]*<([a-zA-Z]*)[\s]*([^>]*)>(.*)<\/\1>[\s]*$/i,
-			namevalueMatcher = /\s*([a-zA-Z]*)=([\'\"]?)([^=\2]*)\2\s*/g,
-			html, el, namevalue;
-		if(html = str.match(htmlMatcher)){
-			el = document.createElement(html[1]);
-			while(namevalue = namevalueMatcher.exec(html[2])){
-				if(namevalue[1].toLowerCase() === 'style'){
-					el.style.cssText = namevalue[3];
-				}
-				else{
-					el.setAttribute(namevalue[1], namevalue[3]);
-				}
-			};
-			el.innerHTML = html[3];
-			return el;
+		var htmlMatcher = /^[\s]*<([a-zA-Z]*)[\s]*([^>]*)>(.*)<\/\1>[\s]*/i,
+			temp, elem;
+		if(str.match(htmlMatcher)){
+			temp = document.createElement('div');
+			temp.innerHTML = str;
+			elem = temp.firstChild;
+			if (temp.childNodes.length === 1) {
+				return elem;
+			} else {
+				var frag = document.createDocumentFragment();
+				while (elem = temp.firstChild) frag.appendChild(elem);
+				return frag;
+			}
 		}
 		else{
 			el = document.createElement(str);
@@ -74,16 +72,29 @@ Cold.add('Cold.dom', function(){
 		return camelized;
 	};
 
+	var _setOpacity = function(el, opacity){
+		el.style.opacity = opacity;
+		el.style.filter = 'alpha(opacity=' + opacity*100 + ')';
+	};
+
 	var _css = function(el, style, value){
 		el = _id(el);
 		if(Cold.isString(style)){
-			if(!!value) el.style[style] = value;
-			else		return el.style[style];
+			if(!!value){
+				style.toLowerCase() === 'opacity'
+					? _setOpacity(el, value)
+					: ( el.style[style] = value );
+			}
+			else{
+				return el.style[style]
+			};
 		}
 		else{
 			style = style || {};
 			for(var s in style){
-				el.style[_camelize(s)] = style[s];
+				s.toLowerCase() === 'opacity'
+					? _setOpacity(el, style[s])
+					: ( el.style[_camelize(s)] = style[s] );
 			}
 			return el;
 		}
@@ -230,6 +241,7 @@ Cold.add('Cold.dom', function(){
 		$CN			: _$CN,
 		$T			: _$T,
 		css			: _css,
+		setOpacity	: _setOpacity,
 		val			: _val,
 		html		: _html,
 		insert		: _insert,
