@@ -2,13 +2,19 @@ Cold.add('Cold.dom', function(){
 
 	//console.info("dom 载入完毕。");
 
+	var domCache = Cold['cache']['elems'] = {};
+
 	var _selector = function(){
-		var elems = null;
-		return elems;
 	};
 
 	var _id = function(str){
-		return Cold.isString(str) ? document.getElementById(str) : str;
+		if(domCache[str]){
+			return domCache[str];
+		}
+		if(Cold.isString(str)){
+			return ( domCache[str] = document.getElementById(str) );
+		}
+		return str;
 	};
 
 	var _create = function(str, property){
@@ -75,6 +81,9 @@ Cold.add('Cold.dom', function(){
 	var _setOpacity = function(el, opacity){
 		el.style.opacity = opacity;
 		el.style.filter = 'alpha(opacity=' + opacity*100 + ')';
+		if(el.filters){
+			el.style.zoom = 1;
+		}
 	};
 
 	var _css = function(el, style, value){
