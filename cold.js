@@ -165,6 +165,11 @@
 
 	window['Cold'] = _cold;
 
+	try{
+		document.domain = window.location.href.match(/http:\/\/(www\.)?([^\/]*)\//)[2];
+		document.execCommand("BackgroundImageCache",false,true);
+	}catch(ex){}
+
 })();
 
 Cold.add('Cold', function(){

@@ -67,23 +67,45 @@ Cold.add('Cold.dom', function(){
 	};
 
 	var _camelize = function(str){
-		var parts = str.split('-'), len = parts.length;
-		if (len == 1) return parts[0];
-		var camelized = (str.charAt(0) === '-')
-			? parts[0].charAt(0).toUpperCase() + parts[0].slice(1)
-			: parts[0];
-		for (var i = 1; i < len; i++){
-			camelized += parts[i].charAt(0).toUpperCase() + parts[i].slice(1);
-		}
-		return camelized;
+		return String(str).replace(/\-(\w)/g, function(a, b){ return b.toUpperCase(); });
 	};
 
-	var _setOpacity = function(el, opacity){
-		el.style.opacity = opacity;
-		el.style.filter = 'alpha(opacity=' + opacity*100 + ')';
-		if(el.filters){
-			el.style.zoom = 1;
+	var _opacity = function(el, opacity){
+		var ret;
+		el = _id(el);
+		if(opacity){
+			el.style.opacity = opacity;
+			el.style.filter = 'alpha(opacity=' + opacity*100 + ')';
+			if(el.filters){
+				el.style.zoom = 1;
+			}
 		}
+		else{
+			if(el.style.filter){
+				ret = /alpha\(opacity=(.*)\)/.match(el.style.filter);
+				ret = (!!ret) ? parseInt(ret[1], 10)/100 : 1.0;
+				return ret;
+			}
+			return el.style.opacity || 1.0;
+		}
+	};
+
+	var _getCurrentStyle = function(el, style){
+		el = _id(el);
+		var ret = '',
+			d = el.ownerDocument.defaultView;
+		if(d && d.getComputedStyle){
+			ret = d.getComputedStyle(el, null)[_camelize(style)];
+		}else if(el.currentStyle){
+			ret = el.currentStyle[_camelize(style)];
+		}else{
+			ret = el.style[style];
+		}
+		if(style === 'opacity'){
+			if (ret) return parseFloat(ret, 10);
+			else		return _opacity(el);
+		}
+		return (!ret || ret === 'auto') ? 0 : ret;
 	};
 
 	var _css = function(el, style, value){
@@ -91,18 +113,18 @@ Cold.add('Cold.dom', function(){
 		if(Cold.isString(style)){
 			if(!!value){
 				style.toLowerCase() === 'opacity'
-					? _setOpacity(el, value)
+					? _opacity(el, value)
 					: ( el.style[style] = value );
 			}
 			else{
-				return el.style[style]
+				return _getCurrentStyle(el, style);
 			};
 		}
 		else{
 			style = style || {};
 			for(var s in style){
 				s.toLowerCase() === 'opacity'
-					? _setOpacity(el, style[s])
+					? _opacity(el, style[s])
 					: ( el.style[_camelize(s)] = style[s] );
 			}
 			return el;
@@ -240,6 +262,9 @@ Cold.add('Cold.dom', function(){
 		return _insert(el, html, 'afterend');
 	};
 
+	var _width = function(){};
+	var _height = function(){};
+
 	return {
 		selector	: _selector,
 		$			: _selector,
@@ -250,14 +275,15 @@ Cold.add('Cold.dom', function(){
 		$CN			: _$CN,
 		$T			: _$T,
 		css			: _css,
-		setOpacity	: _setOpacity,
 		val			: _val,
 		html		: _html,
 		insert		: _insert,
 		insertBefore: _insertBefore,
 		insertAfter	: _insertAfter,
 		appendFront	: _appendFront,
-		appendEnd	: _appendEnd
+		appendEnd	: _appendEnd,
+		width		: _width,
+		height		: _height
 	};
 	
 });
