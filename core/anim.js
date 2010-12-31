@@ -9,7 +9,7 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 			return +new Date;
 		};
 
-	var _Easing = {
+	var Easing = {
 		'linear' : function(t){
 			return t;
 		},
@@ -70,7 +70,7 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 			return .5 * ((t -= 2) * t * (((BACK_CONST *= (1.525)) + 1) * t + BACK_CONST) + 2);
 		},
 		'bounceIn' : function(t){
-			return 1 - _Easing.bounceOut(1 - t);
+			return 1 - Easing.bounceOut(1 - t);
 		},
 		'bounceOut' : function(t){
 			var s = 7.5625, r;
@@ -90,9 +90,9 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 		},
 		'bounceBoth' : function(t){
 			if (t < .5) {
-				return _Easing.bounceIn(t * 2) * .5;
+				return Easing.bounceIn(t * 2) * .5;
 			}
-			return _Easing.bounceOut(t * 2 - 1) * .5 + .5;
+			return Easing.bounceOut(t * 2 - 1) * .5 + .5;
 		}
 	};
 
@@ -113,7 +113,7 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 	};
 
 	_effect.prototype = (function(){
-		var queue = [];
+		var queue = {};
 		return {
 			init : function(el, props, option){
 				this.el = _id(el);
@@ -131,8 +131,6 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 				option = option || {};
 				Cold.extend(_effect.DefaultOption, option, true);
 				Cold.extend(this, _effect.DefaultOption, true);
-				this.begin = $time();
-				this.end = this.begin + this.duration;
 				//this.current = 0;
 			},
 			step : function(){
@@ -161,24 +159,42 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 				}
 			},
 			compute : function(from, to, progress){
-				return from + (to - from) * _Easing[this.easing || 'linear'](progress);
+				return from + (to - from) * Easing[this.easing || 'linear'](progress);
 			},
 			pause : function(){
-				this.pause = true;
+				this.paused = true;
 			},
 			resume : function(){
-				this.pause = false;
+				this.paused = false;
 			},
 			reset : function(){
 				this.update(0);
 				this.stop();
 			},
-			start : function(){
-				this.onStart && this.onStart();
-				var that = this;
-				this.timer = setInterval(function(){
-					!this.pause && that.step.call(that);
-				}, this.fps || _effect.DefaultOption.fps);
+			start : function(inQueue){
+				inQueue = inQueue || false;
+				var f = (function(that){
+					return function(){
+						that.begin = $time();
+						that.end = that.begin + that.duration;
+
+						var old = that.onComplete, next;
+						that.onStart && that.onStart();
+
+						that.onComplete = function(){
+							old && old();
+							//console.info(queue[that.el].length);
+							next = queue[that.el].shift();
+							next && next();
+						};
+
+						that.timer = setInterval(function(){
+							!that.paused && that.step.call(that);
+						}, that.fps || _effect.DefaultOption.fps);
+					};
+				})(this);
+				if(!(this.el in queue)) queue[this.el] = [];
+				inQueue ? queue[this.el].push(f) : f();
 			},
 			stop: function(){
 				this.timer && clearInterval(this.timer);
@@ -186,25 +202,34 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 		};
 	})();
 
-	var _run = function(el, props, callback, duration, easing){
-		if(Cold.isFunction(callback)){
-			option = {};
-			option.onComplete = callback;
-			option.duration = duration;
-			option.easing = easing;
-		}
-		else{
-			option = callback;
-		}
-		var anim = new _effect(el, props, option);
-		anim.start();
+	var _runBuilder = function(inQueue){
+		inQueue = inQueue || false;
+		return function(el, props, callback, duration, easing){
+			if(Cold.isFunction(callback)){
+				option = {};
+				option.onComplete = callback;
+				option.duration = duration;
+				option.easing = easing;
+			}
+			else{
+				option = callback;
+			}
+			var anim = new _effect(el, props, option);
+			anim.start(inQueue);
+		};
 	};
 
-	var _move = function(){
+	/* run 和 queue的不同之处在于，run直接执行，queue会等到它前面的run和queue执行完了才执行 */
+	var run = _runBuilder();
+
+	/* queue在第一个出现时，效果和run一样 */
+	var queue = _runBuilder(true);
+
+	var move = function(){
 		
 	};
 
-	var _fade = function(el, to, callback, duration, easing){
+	var fade = function(el, to, callback, duration, easing){
 		var anim = new _effect(el, { opacity : to },{
 			'duration' : duration,
 			'onComplete' : callback,
@@ -213,7 +238,7 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 		anim.start();
 	};
 
-	var _fadeIn = function(el, callback, duration, easing){
+	var fadeIn = function(el, callback, duration, easing){
 		var anim = new _effect(el, { opacity : 0 },{
 			'duration' : duration,
 			'onComplete' : function(){},
@@ -222,7 +247,7 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 		anim.start();
 	};
 
-	var _fadeOut = function(el, callback, duration, easing){
+	var fadeOut = function(el, callback, duration, easing){
 		var anim = new _effect(el, { opacity : 1 },{
 			'duration' : duration,
 			'onComplete' : callback,
@@ -231,7 +256,7 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 		anim.start();
 	};
 
-	var _slide = function(el, to, callback, duration, easing){
+	var slide = function(el, to, callback, duration, easing){
 		var anim = new _effect(el, { height : to },{
 			'duration' : duration,
 			'onComplete' : function(){},
@@ -240,33 +265,14 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 		anim.start();
 	};
 
-	var _slideUp = function(el, callback, duration, easing){
-		var anim = new _effect(el, { height : 0 },{
-			'duration' : duration,
-			'onComplete' : function(){},
-			'easing' : easing
-		}, option);
-		anim.start();
-	};
-
-	var _slideDown = function(el, callback, duration, easing){
-		var anim = new _effect(el, { height : 0 },{
-			'duration' : duration,
-			'onComplete' : function(){},
-			'easing' : easing
-		}, option);
-		anim.start();
-	};
-
 	return {
-		run			: _run,
-		move		: _move,
-		fade		: _fade,
-		fadeIn		: _fadeIn,
-		fadeOut		: _fadeOut,
-		slide		: _slide,
-		slideUp		: _slideUp,
-		slideDown	: _slideDown,
-		Easing		: _Easing
+		run			: run,
+		queue		: queue,
+		move		: move,
+		fade		: fade,
+		fadeIn		: fadeIn,
+		fadeOut		: fadeOut,
+		slide		: slide,
+		Easing		: Easing
 	};
 });
