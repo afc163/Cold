@@ -216,6 +216,7 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 			}
 			var anim = new _effect(el, props, option);
 			anim.start(inQueue);
+			return this;
 		};
 	};
 
