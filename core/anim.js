@@ -149,7 +149,7 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 				for(var p in this.props){
 					var pos = this.compute(this.from[p], this.to[p], progress);
 					//console.info(this.from[p] + " " + pos + " " + this.to[p]);
-					if(p in this.el.style){
+					if(p in this.el.style || p === 'opacity'){
 						if(p !== 'opacity') pos = parseInt(pos, 10) + 'px';
 						_css(this.el, p, pos);
 					}
@@ -172,7 +172,9 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 				this.stop();
 			},
 			start : function(inQueue){
+				var firstRun = false;
 				inQueue = inQueue || false;
+
 				var f = (function(that){
 					return function(){
 						that.begin = $time();
@@ -183,9 +185,11 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 
 						that.onComplete = function(){
 							old && old();
-							//console.info(queue[that.el].length);
-							next = queue[that.el].shift();
-							next && next();
+							if(firstRun || inQueue){
+								//console.info(queue[that.el].length);
+								next = queue[that.el].shift();
+								next && next();
+							}
 						};
 
 						that.timer = setInterval(function(){
@@ -193,7 +197,11 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 						}, that.fps || _effect.DefaultOption.fps);
 					};
 				})(this);
-				if(!(this.el in queue)) queue[this.el] = [];
+
+				if(!(this.el in queue)) {
+					firstRun = true;
+					queue[this.el] = [];
+				};
 				inQueue ? queue[this.el].push(f) : f();
 			},
 			stop: function(){
