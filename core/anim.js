@@ -96,14 +96,47 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 			return Easing.bounceOut(t * 2 - 1) * .5 + .5;
 		}
 	};
+
+	var _color = {
+		//from YUI
+		re_RGB: /^rgb\(([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]+)\)$/i,
+		re_hex: /^#?([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})$/i,
+		re_hex3: /^#?([0-9A-F]{1})([0-9A-F]{1})([0-9A-F]{1})$/i,
 		
-	var colorInit = function(el, p){
-		var colorStyles = /backgroundColor|borderBottomColor|borderLeftColor|borderRightColor|borderTopColor|color|outlineColor/i;
-		var from, to;
-		if(colorStyles.test(p)){
-			
+		getRGB : function(val){
+			if(_color.re_hex.exec(val)) {
+				val = 'rgb(' + [
+					parseInt(RegExp.$1, 16),
+					parseInt(RegExp.$2, 16),
+					parseInt(RegExp.$3, 16)
+				].join(', ') + ')';
+			}
+			else if(_color.re_hex3.exec(val)){
+				val = 'rgb(' + [
+					parseInt(RegExp.$1+RegExp.$1, 16),
+					parseInt(RegExp.$2+RegExp.$2, 16),
+					parseInt(RegExp.$3+RegExp.$3, 16)
+				].join(', ') + ')';
+			}
+			return val;
+		},
+		isColorStyle : function(p){
+			var re_color = /backgroundColor|borderBottomColor|borderLeftColor|borderRightColor|borderTopColor|color|outlineColor/i;
+			return re_color.test(p);
+		},
+		init : function(el, p, prop){
+			var from, to, frgb, trgb, re_rgb = _color.re_RGB;
+
+			frgb = _css(el, p);
+			frgb = frgb.match(re_rgb);
+			from = [parseInt(frgb[1], 10), parseInt(frgb[2], 10), parseInt(frgb[3], 10)];
+
+			trgb = _color.getRGB(prop);
+			trgb = trgb.match(re_rgb);
+			to = [parseInt(trgb[1], 10), parseInt(trgb[2], 10), parseInt(trgb[3], 10)];
+
+			return [from, to];
 		}
-		return [from, to];
 	};
 
 	var _effect = function(){
@@ -131,23 +164,33 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 				this.from = {};
 				this.to = {};
 				this.unit = {};
-				for(var p in this.props){
-					var prop = this.props[p],
-						temp = Cold.isString(prop) ? prop.match(/^(\d*)(\.\d*)?(.*)$/) : prop;
-					if(temp){
-						this.from[p] = parseFloat(this.el[p] || _css(this.el, p));
-						this.to[p] = temp[1] || temp;
-						this.unit[p] = temp[3] || 'px';
-						//console.info(p+"| from: "+this.from[p] + " to: " + this.to[p] + " unit: " + this.unit[p]);
-					}
-					else{
-						throw 'Invalid arguments in anim init.';
-					}
-				}
+				
 				option = option || {};
 				Cold.extend(_effect.DefaultOption, option, true);
 				Cold.extend(this, _effect.DefaultOption, true);
 				//this.current = 0;
+			},
+			initData : function(){
+				this.begin = $time();
+				this.end = this.begin + this.duration;
+				for(var p in this.props){
+					var prop = this.props[p],
+						temp = Cold.isString(prop) ? prop.match(/^(\d*)(\.\d*)?(.*)$/) : prop;
+					if(_color.isColorStyle(p)){
+						var c = _color.init(this.el, p, prop);
+						this.from[p] = c[0];
+						this.to[p] = c[1];
+					}
+					else if(temp){
+						this.from[p] = parseFloat(this.el[p] || _css(this.el, p));
+						this.to[p] = temp[1] || temp;
+						this.unit[p] = temp[3] || 'px';
+					}
+					else{
+						throw 'anim init: Invalid arguments.';
+					}
+					console.info(p+"| from: "+this.from[p] + " to: " + this.to[p]);
+				}
 			},
 			step : function(){
 				var now = $time();
@@ -164,13 +207,9 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 			update : function(progress){
 				for(var p in this.props){
 					var pos = this.compute(this.from[p], this.to[p], progress);
-					//console.info(this.from[p] + " " + pos + " " + this.to[p]);
-					if(/color/i.test(p)){
-
-						return;
-					}
 					if(_isStyle(this.el, p)){
-						if(p !== 'opacity') pos = parseInt(pos, 10) + this.unit[p];
+						if(p !== 'opacity' && !_color.isColorStyle(p)) pos = parseInt(pos, 10) + this.unit[p];
+						//console.info(this.from[p] + " " + pos + " " + this.to[p]);
 						_css(this.el, p, pos);
 					}
 					else{
@@ -179,7 +218,14 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 				}
 			},
 			compute : function(from, to, progress){
-				return from + (to - from) * Easing[this.easing || 'linear'](progress);
+				var e = Easing[this.easing || 'linear'];
+				if(Cold.isArray(from)){
+					var r = parseInt(from[0] + (to[0] - from[0]) * e(progress), 10),
+						b = parseInt(from[1] + (to[1] - from[1]) * e(progress), 10),
+						g = parseInt(from[2] + (to[2] - from[2]) * e(progress), 10);
+					return 'rgb('+ r +','+ b +','+ g +')';
+				}
+				return from + (to - from) * e(progress);
 			},
 			pause : function(){
 				this.paused = true;
@@ -199,9 +245,8 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 
 				var f = (function(that){
 					return function(){
-						that.begin = $time();
-						that.end = that.begin + that.duration;
-
+						that.initData();
+						
 						var old = that.onComplete, next;
 						that.onStart && that.onStart();
 
@@ -215,7 +260,11 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 						};
 
 						that.timer = setInterval(function(){
-							!that.paused && that.step.call(that);
+							if(that.paused){
+								that.end += that.fps;
+								return;
+							}
+							that.step.call(that);
 						}, that.fps || _effect.DefaultOption.fps);
 					};
 				})(this);
@@ -230,6 +279,7 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 			},
 			stop: function(){
 				this.timer && clearInterval(this.timer);
+				this.timer = null;
 			}
 		};
 	})();
@@ -258,8 +308,18 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 	/* queue在第一个出现时，效果和run一样 */
 	var queue = _runBuilder(true);
 
-	var move = function(){
-		
+	var move = function(el, toPos, callback, duration, easing){
+		if(_css(el, 'position') !== 'static'){
+			var anim = new _effect(el, { left:toPos[0], top:toPos[1] },{
+				'duration' : duration,
+				'onComplete' : callback,
+				'easing' : easing
+			}, option);
+			anim.start();
+		}
+		else{
+			throw 'position is static, cant move!';
+		}
 	};
 
 	var fade = function(el, to, callback, duration, easing){

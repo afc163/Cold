@@ -28,8 +28,8 @@
 		BaseURL: (function(){
 			var scripts = document.getElementsByTagName('script'),
 				str = scripts[scripts.length - 1].getAttribute('src'),
-				httpMatcher = /http:\/\/[^\/]*\//;
-			return (str.match(httpMatcher) || window.location.href.match(httpMatcher))[0];
+				re_http = /http:\/\/[^\/]*\//;
+			return (str.match(re_http) || window.location.href.match(re_http))[0];
 		})(),
 
 		cache: {},

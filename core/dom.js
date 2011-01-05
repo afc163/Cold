@@ -18,9 +18,9 @@ Cold.add('Cold.dom', ['Cold.browser'], function(){
 	};
 
 	var create = function(str, property){
-		var htmlMatcher = /^[\s]*<([a-zA-Z]*)[\s]*([^>]*)>(.*)<\/\1>[\s]*/i,
+		var re_html = /^[\s]*<([a-zA-Z]*)[\s]*([^>]*)>(.*)<\/\1>[\s]*/i,
 			temp, elem;
-		if(str.match(htmlMatcher)){
+		if(str.match(re_html)){
 			temp = document.createElement('div');
 			temp.innerHTML = str;
 			elem = temp.firstChild;
