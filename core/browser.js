@@ -1,7 +1,7 @@
 Cold.add("Cold.browser", function(){
 
 	var _ua = navigator.userAgent.toLowerCase();
-	var _browser = {
+	var browser = {
 		platform: navigator.platform,
 		engine	: {
 			presto: function(){
@@ -17,6 +17,9 @@ Cold.add("Cold.browser", function(){
 				return (!document.getBoxObjectFor && window.mozInnerScreenX == null) ? false : ((document.getElementsByClassName) ? 19 : 18);
 			}
 		},
+		detect	: function(){
+		
+		},
 		version : (_ua.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [0, '0'])[1],
 		msie	: /msie/.test(_ua),
 		firefox : /firefox/.test(_ua),
@@ -24,11 +27,11 @@ Cold.add("Cold.browser", function(){
 		safari	: /safari/.test(_ua) && !this.chrome,
 		opera	: /opera/.test(_ua)
 	};
-	_browser.ie = _browser.msie;
-	_browser.ie6 = _browser.msie && parseInt(_browser.version) === 6;
-	_browser.ie7 = _browser.msie && parseInt(_browser.version) === 7;
-	_browser.ie8 = _browser.msie && parseInt(_browser.version) === 8;
+	browser.ie = browser.msie;
+	browser.ie6 = browser.msie && parseInt(browser.version) === 6;
+	browser.ie7 = browser.msie && parseInt(browser.version) === 7;
+	browser.ie8 = browser.msie && parseInt(browser.version) === 8;
 
-	return _browser;
+	return browser;
 
 });

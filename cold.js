@@ -1,7 +1,7 @@
 //cold.js
 
 (function(){
-	var scriptOnload = document.createElement('script').readyState ?
+	var _scriptOnload = document.createElement('script').readyState ?
 	function(node, callback) {
 		var oldCallback = node.onreadystatechange;
 		node.onreadystatechange = function(){
@@ -16,7 +16,12 @@
 		node.addEventListener('load', callback, false);
 	};
 
-	var _cold = {
+	var _checkNs = function(ns){
+		if(!/^\s*Cold/.test(ns)) return 'Cold.' + ns;
+		return ns;
+	};
+
+	var cold = {
 
 		VERSION: '0.0.1',
 
@@ -51,23 +56,21 @@
 		},
 
 		add: function(namespace, req, callback){
+			_checkNs(namespace);
 			var names = namespace.split('.'),
 				namesLen = names.length,
 				space = window;
 
 			var func = (function(f){
 				return function(){
-					if(namesLen < 1){
-						throw 'namespace wrong.';
-					}
 					if(!(names[0] in window)){
 						window[names[0]] = {};
 					}
 					for(var i = 0, n; i < namesLen; i++){
 						n = names[i];
 						if(i === namesLen - 1 && typeof f === 'function'){
-							if(space[n])	_cold.extend(space[n], f());
-							else				space[n] = f();
+							if(space[n])	cold.extend(space[n], f());
+							else			space[n] = f();
 							break;
 						}
 						(!space[n]) && ( space[n] = {} );
@@ -79,7 +82,7 @@
 			//check req
 			if(typeof req !== 'function'){
 				var reqNum = req.length;
-				return _cold.load(req, function(){
+				return cold.load(req, function(){
 					if(--reqNum === 0){
 						func();
 					}
@@ -88,36 +91,37 @@
 			else{
 				func();
 			}
-			return _cold;
+			return cold;
 		},
 
 		addScript: function(url, onComplete){
 			var s = document.createElement('script'),
 				head = document.getElementsByTagName('head')[0],
-				cs = _cold.scripts;
+				cs = cold.scripts;
 
 			s.setAttribute('type', 'text/javascript');
 			s.setAttribute('src', url);
 			//for firefox 3.6
 			s.setAttribute('async', true);
 			head.appendChild(s);
-			scriptOnload(s, function(){
+			_scriptOnload(s, function(){
 				onComplete && onComplete.call();
 				head.removeChild(s);
 			});
 			cs.nodes[url] = s;
-			return _cold;
+			return cold;
 		},
 
 		loadSingle: function(namespace, callback){
-			var cs = _cold.scripts,
+			namespace = _checkNs(namespace);
+			var cs = cold.scripts,
 				node = null,
 				getUrl = function(){
 					var url = namespace;
 					if(!(/component|util|task|other/g.test(namespace))){
 						url = namespace.replace(/Cold/i,'Cold.core');
 					}
-					url = _cold.BaseURL + url.replace(/\./g,'/') + '.js';
+					url = cold.BaseURL + url.replace(/\./g,'/') + '.js';
 					return url;
 				};
 			
@@ -128,7 +132,7 @@
 			//从而避免了重复请求的问题，感谢kissy loader的方法
 			else if(cs[namespace] === 'loading'){
 				if(node = cs.nodes[getUrl()]){
-					scriptOnload(node, function(){
+					_scriptOnload(node, function(){
 						callback && callback.call();
 					});
 				}
@@ -138,32 +142,32 @@
 				cs['loadingNum'] 
 					? (cs['loadingNum'] += 1) 
 					: (cs['loadingNum'] = 1);
-				_cold.addScript(getUrl(), function(){
+				cold.addScript(getUrl(), function(){
 					typeof callback === 'function' && callback.call();
 					cs[namespace] = 'loaded';
 					cs['loadingNum'] -= 1;
 				});
 			}
-			return _cold;
+			return cold;
 		},
 
 		load: function(namespace, callback){
 			namespace = namespace || [];
 			if(typeof namespace === 'string'){
-				return _cold.loadSingle(namespace, callback);
+				return cold.loadSingle(namespace, callback);
 			}
 			else{
 				for(var i=0, len = namespace.length; i<len; i++){
-					_cold.loadSingle(namespace[i], function(){
+					cold.loadSingle(namespace[i], function(){
 						typeof callback === 'function' && callback.call();
 					});
 				}
 			}
-			return _cold;
+			return cold;
 		}
 	};
 
-	window['Cold'] = _cold;
+	window['Cold'] = cold;
 
 	try{
 		document.domain = window.location.href.match(/http:\/\/(www\.)?([^\/]*)\//)[2];
@@ -193,12 +197,12 @@ Cold.add('Cold', function(){
 		funcList = [];
 	};
 
-	var _coldReady = function(){
+	var coldReady = function(){
 		if(executed === true){
 			return;
 		}
 		if(_isComplete() === false){
-			timer = setTimeout(arguments.callee, 15);
+			timer = setTimeout(arguments.callee, 10);
 			return;
 		}
 		timer && clearTimeout(timer);
@@ -215,13 +219,13 @@ Cold.add('Cold', function(){
 
 		//w3c mode
 		if(doc.addEventListener){
-			doc.addEventListener('DOMContentLoaded', _coldReady, false);
-			win.addEventListener('load', _coldReady, false);
+			doc.addEventListener('DOMContentLoaded', coldReady, false);
+			win.addEventListener('load', coldReady, false);
 		}
 		//ie mode
 		else{
-			doc.attachEvent('onreadystatechange', _coldReady);
-			win.attachEvent('onload', _coldReady);
+			doc.attachEvent('onreadystatechange', coldReady);
+			win.attachEvent('onload', coldReady);
 			if(dscroll && win == win.top){
 				(function(){				
 					try{
@@ -236,7 +240,7 @@ Cold.add('Cold', function(){
 		return true;
 	})();
 		
-	var _ready = function(func){
+	var ready = function(func){
 		if(typeof func !== 'function'){
 			return;
 		}
@@ -248,13 +252,13 @@ Cold.add('Cold', function(){
 		}
 	};
 
-	var _type = {};
+	var type = {};
 	(function(){
 		var _toString = Object.prototype.toString;
 		var objTypes = ['Array', 'Function', 'String', 'Number'];
 		for(var i=0, l=objTypes.length; i<l; i++){
 			(function(i){
-				_type["is" + objTypes[i]] = function(obj){
+				type["is" + objTypes[i]] = function(obj){
 					return _toString.call(obj) === '[object ' + objTypes[i] + ']';
 				};
 			})(i);
@@ -262,12 +266,12 @@ Cold.add('Cold', function(){
 	})();
 
 	return {
-		type		: _type,
-		isArray		: _type.isArray,
-		isFunction	: _type.isFunction,
-		isString	: _type.isString,
-		isNumber	: _type.isNumber,
-		ready		: _ready
+		type		: type,
+		isArray		: type.isArray,
+		isFunction	: type.isFunction,
+		isString	: type.isString,
+		isNumber	: type.isNumber,
+		ready		: ready
 	};
 
 });

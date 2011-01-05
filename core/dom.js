@@ -1,13 +1,13 @@
-Cold.add('Cold.dom', function(){
+Cold.add('Cold.dom', ['Cold.browser'], function(){
 
 	//console.info("dom 载入完毕。");
 
 	var domCache = Cold['cache']['elems'] = {};
 
-	var _selector = function(){
+	var selector = function(){
 	};
 
-	var _id = function(str){
+	var id = function(str){
 		if(domCache[str]){
 			return domCache[str];
 		}
@@ -17,7 +17,7 @@ Cold.add('Cold.dom', function(){
 		return str;
 	};
 
-	var _create = function(str, property){
+	var create = function(str, property){
 		var htmlMatcher = /^[\s]*<([a-zA-Z]*)[\s]*([^>]*)>(.*)<\/\1>[\s]*/i,
 			temp, elem;
 		if(str.match(htmlMatcher)){
@@ -41,7 +41,7 @@ Cold.add('Cold.dom', function(){
 		}
 	};
 
-	var _$CN = function(str, node, tag){
+	var $CN = function(str, node, tag){
 		if(document.getElementsByClassName){
 			return document.getElementsByClassName(str);
 		}
@@ -62,7 +62,7 @@ Cold.add('Cold.dom', function(){
 		}
 	};
 
-	var _$T = function(str){
+	var $T = function(str){
 		return typeof Cold.isString(str) ? document.getElementsByTagName(str) : str;
 	};
 
@@ -70,9 +70,9 @@ Cold.add('Cold.dom', function(){
 		return String(str).replace(/\-(\w)/g, function(a, b){ return b.toUpperCase(); });
 	};
 
-	var _opacity = function(el, opacity){
+	var opacity = function(el, opacity){
 		var ret;
-		el = _id(el);
+		el = id(el);
 		if(opacity){
 			el.style.opacity = opacity;
 			el.style.filter = 'alpha(opacity=' + opacity*100 + ')';
@@ -91,7 +91,7 @@ Cold.add('Cold.dom', function(){
 	};
 
 	var _getCurrentStyle = function(el, style){
-		el = _id(el);
+		el = id(el);
 		var ret = '',
 			d = el.ownerDocument.defaultView;
 		if(d && d.getComputedStyle){
@@ -103,18 +103,22 @@ Cold.add('Cold.dom', function(){
 		}
 		if(style === 'opacity'){
 			if (ret) return parseFloat(ret, 10);
-			else		return _opacity(el);
+			else		return opacity(el);
 		}
 		return (!ret || ret === 'auto') ? 0 : ret;
 	};
 
-	var _css = function(el, style, value){
-		el = _id(el);
+	var isStyle = function(el, p){
+		return _camelize(p) in el.style || p in el.style || p === 'opacity';
+	};
+
+	var css = function(el, style, value){
+		el = id(el);
 		if(Cold.isString(style)){
 			if(!!value){
 				style.toLowerCase() === 'opacity'
-					? _opacity(el, value)
-					: ( el.style[style] = value );
+					? opacity(el, value)
+					: ( el.style[_camelize(style)] = value );
 			}
 			else{
 				return _getCurrentStyle(el, style);
@@ -124,15 +128,15 @@ Cold.add('Cold.dom', function(){
 			style = style || {};
 			for(var s in style){
 				s.toLowerCase() === 'opacity'
-					? _opacity(el, style[s])
+					? opacity(el, style[s])
 					: ( el.style[_camelize(s)] = style[s] );
 			}
 			return el;
 		}
 	};
 
-	var _val = function(el, prop, value){
-		el = _id(el);
+	var val = function(el, prop, value){
+		el = id(el);
 		if(Cold.isString(prop)){
 			if(!!value) el.setAttribute(prop, value);
 			else		return el.getAttribute(prop);
@@ -146,8 +150,8 @@ Cold.add('Cold.dom', function(){
 		return el;
 	};
 
-	var _html = function(el, value){
-		el = _id(el);
+	var html = function(el, value){
+		el = id(el);
 		if(!!value){
 			el.innerHTML = value;
 		}
@@ -158,7 +162,7 @@ Cold.add('Cold.dom', function(){
 	};
 
 	var _insertHTML = function(el, html, where){
-		el = _id(el);
+		el = id(el);
 		where = where? where.toLowerCase(): "beforeend";
 		if(el.insertAdjacentHTML) {
 			switch(where){
@@ -219,8 +223,8 @@ Cold.add('Cold.dom', function(){
 		}
 	};
 
-	var _insert = function(el, target, where){
-		el = _id(el);
+	var insert = function(el, target, where){
+		el = id(el);
 		where = where? where.toLowerCase(): "beforeend";
 		if(Cold.isString(target)){
 			_insertHTML(el, target, where);
@@ -246,44 +250,54 @@ Cold.add('Cold.dom', function(){
 		}
 	};
 
-	var _insertBefore = function(el, html){
-		return _insert(el, html, 'beforebegin');
+	var insertBefore = function(el, html){
+		return insert(el, html, 'beforebegin');
 	};
 
-	var _appendFront = function(el, html){
-		return _insert(el, html, 'afterbegin');
+	var appendFront = function(el, html){
+		return insert(el, html, 'afterbegin');
 	};
 
-	var _appendEnd = function(el, html){
-		return _insert(el, html, 'beforeend');
+	var appendEnd = function(el, html){
+		return insert(el, html, 'beforeend');
 	};
 
-	var _insertAfter = function(el, html){
-		return _insert(el, html, 'afterend');
+	var insertAfter = function(el, html){
+		return insert(el, html, 'afterend');
 	};
 
-	var _width = function(){};
-	var _height = function(){};
+	var	_hidden = Cold.IE && css(el, 'display') === 'none', w, h;
+	var width = function(el){
+		el = id(el);
+		w = Math.max(el.offsetWidth, _hidden ? 0 : el.clientWidth) || 0;
+		return w < 0 ? 0 : w;
+	};
+	var height = function(el){
+		el = id(el);
+		h = Math.max(el.offsetHeight, _hidden ? 0 : el.clientHeight) || 0;
+		return h < 0 ? 0 : h;
+	};
 
 	return {
-		selector	: _selector,
-		$			: _selector,
-		id			: _id,
-		$E			: _id,
-		$C			: _create,
-		create		: _create,
-		$CN			: _$CN,
-		$T			: _$T,
-		css			: _css,
-		val			: _val,
-		html		: _html,
-		insert		: _insert,
-		insertBefore: _insertBefore,
-		insertAfter	: _insertAfter,
-		appendFront	: _appendFront,
-		appendEnd	: _appendEnd,
-		width		: _width,
-		height		: _height
+		selector	: selector,
+		$			: selector,
+		id			: id,
+		$E			: id,
+		$C			: create,
+		create		: create,
+		$CN			: $CN,
+		$T			: $T,
+		isStyle		: isStyle,
+		css			: css,
+		val			: val,
+		html		: html,
+		insert		: insert,
+		insertBefore: insertBefore,
+		insertAfter	: insertAfter,
+		appendFront	: appendFront,
+		appendEnd	: appendEnd,
+		width		: width,
+		height		: height
 	};
 	
 });

@@ -4,12 +4,12 @@ Cold.add('Cold.event', function(){
 
 	//console.info("event 载入完毕。");
 
-	var _id = function(elem){
+	var id = function(elem){
 		return elem = Cold.isString(elem) ? document.getElementById(elem) : elem;
 	};
 
-	var _addEvent = function(elem, eventType, func){
-		elem = _id(elem);
+	var addEvent = function(elem, eventType, func){
+		elem = id(elem);
 		eventType = eventType || 'click';
 
 		if(!elem || elem.nodeType === 3 || elem.nodeType === 8 || !Cold.isFunction(func)){
@@ -28,8 +28,8 @@ Cold.add('Cold.event', function(){
 		return true;
 	};
 
-	var _delEvent = function(elem, eventType, func){
-		elem = _id(elem);
+	var delEvent = function(elem, eventType, func){
+		elem = id(elem);
 		eventType = eventType || 'click';
 		if(!elem || elem.nodeType === 3 || elem.nodeType === 8 || !Cold.isFunction(func)){
 			return false;
@@ -47,8 +47,8 @@ Cold.add('Cold.event', function(){
 		return true;
 	};
 
-	var _fireEvent = function(elem, eventType){
-		elem = _id(elem);
+	var fireEvent = function(elem, eventType){
+		elem = id(elem);
 		eventType = eventType || 'click';
 
 		if(elem.fireEvent){
@@ -63,8 +63,8 @@ Cold.add('Cold.event', function(){
 	};
 
 	return {
-		add		: _addEvent,
-		remove	: _delEvent,
-		fire	: _fireEvent
+		add		: addEvent,
+		remove	: delEvent,
+		fire	: fireEvent
 	};
 });

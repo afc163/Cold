@@ -18,7 +18,7 @@ Cold.add("Cold.ajax",function(){
 		return url + '?' + _jsonToQuery(data);
 	};
 
-	var _getRequest = function(){
+	var getRequest = function(){
 		try{
 			return new XMLHttpRequest();
 		}
@@ -44,11 +44,11 @@ Cold.add("Cold.ajax",function(){
 		onError		: function(){}
 	};
 
-	var _ajax = function(url, option){
+	var ajax = function(url, option){
 		if (url == '' || url == null) {
 			throw new Error('ajax need parameter url.');
 		}
-		var XHR = _getRequest(),
+		var XHR = getRequest(),
 			op = _defaultOption,
 			method;
 		Cold.extend(op, option, true);
@@ -91,48 +91,47 @@ Cold.add("Cold.ajax",function(){
 		return XHR;
 	};
 
-	var _get = function(url, option){
+	var get = function(url, option){
 		option = option || {};
 		option['method'] = 'get';
-		return _ajax(url, option);
+		return ajax(url, option);
 	};
 
-	var _post = function(url, option){
+	var post = function(url, option){
 		option = option || {};
 		option['method'] = 'post';
-		return _ajax(url, option);
+		return ajax(url, option);
 	};
 
-	var _getJson = function(url, option){
+	var getJson = function(url, option){
 		option = option || {};
 		option['method'] = 'get';
 		option['returnType'] = 'json';
-		return _ajax(url, option);
+		return ajax(url, option);
 	};
 
-	var _getXml = function(url, option){
+	var getXml = function(url, option){
 		option = option || {};
 		option['method'] = 'get';
 		option['returnType'] = 'xml';
-		return _ajax(url, option);
+		return ajax(url, option);
 	};
 
-	var _getText = function(url, option){
+	var getText = function(url, option){
 		option = option || {};
 		option['method'] = 'get';
 		option['returnType'] = 'text';
-		return _ajax(url, option);
+		return ajax(url, option);
 	};
 	
 	return {
-		getXHR		: _getRequest,
-		ajax		: _ajax,
-		get			: _get,
-		post		: _post,
-		getJson		: _getJson,
-		getXml		: _getXml,
-		getText		: _getText,
-		jsonToQuery : _jsonToQuery
+		getXHR		: getRequest,
+		ajax		: ajax,
+		get			: get,
+		post		: post,
+		getJson		: getJson,
+		getXml		: getXml,
+		getText		: getText
 	};
 	
 });

@@ -3,6 +3,7 @@
 Cold.add('Cold.anim', ['Cold.dom'], function(){
 	var _id = Cold.dom.$E,
 		_css = Cold.dom.css,
+		_isStyle = Cold.dom.isStyle;
 		$void = function(){},
 		BACK_CONST = 1.70158,
 		$time = Date.now || function(){
@@ -95,14 +96,23 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 			return Easing.bounceOut(t * 2 - 1) * .5 + .5;
 		}
 	};
+		
+	var colorInit = function(el, p){
+		var colorStyles = /backgroundColor|borderBottomColor|borderLeftColor|borderRightColor|borderTopColor|color|outlineColor/i;
+		var from, to;
+		if(colorStyles.test(p)){
+			
+		}
+		return [from, to];
+	};
 
 	var _effect = function(){
 		this.init.apply(this, arguments);
 	};
 
 	_effect.DefaultOption = {
-		'fps'		: 13,
-		'duration'	: 2000,
+		'fps'		: 25,
+		'duration'	: 1000,
 		'onStart'	: $void,
 		'onComplete': $void,
 		/*
@@ -118,14 +128,20 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 			init : function(el, props, option){
 				this.el = _id(el);
 				this.props = props || {};
-				this.from = {}
+				this.from = {};
 				this.to = {};
+				this.unit = {};
 				for(var p in this.props){
-					var temp = parseFloat(this.props[p]);
+					var prop = this.props[p],
+						temp = Cold.isString(prop) ? prop.match(/^(\d*)(\.\d*)?(.*)$/) : prop;
 					if(temp){
 						this.from[p] = parseFloat(this.el[p] || _css(this.el, p));
-						//console.info(p+" : "+this.from[p]);
-						this.to[p] = temp;
+						this.to[p] = temp[1] || temp;
+						this.unit[p] = temp[3] || 'px';
+						//console.info(p+"| from: "+this.from[p] + " to: " + this.to[p] + " unit: " + this.unit[p]);
+					}
+					else{
+						throw 'Invalid arguments in anim init.';
 					}
 				}
 				option = option || {};
@@ -149,8 +165,12 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 				for(var p in this.props){
 					var pos = this.compute(this.from[p], this.to[p], progress);
 					//console.info(this.from[p] + " " + pos + " " + this.to[p]);
-					if(p in this.el.style || p === 'opacity'){
-						if(p !== 'opacity') pos = parseInt(pos, 10) + 'px';
+					if(/color/i.test(p)){
+
+						return;
+					}
+					if(_isStyle(this.el, p)){
+						if(p !== 'opacity') pos = parseInt(pos, 10) + this.unit[p];
 						_css(this.el, p, pos);
 					}
 					else{
@@ -172,6 +192,8 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 				this.stop();
 			},
 			start : function(inQueue){
+				this.stop();
+
 				var firstRun = false;
 				inQueue = inQueue || false;
 
@@ -188,7 +210,7 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 							if(firstRun || inQueue){
 								//console.info(queue[that.el].length);
 								next = queue[that.el].shift();
-								next && next();
+								next ? next() : delete queue[that.el];
 							}
 						};
 
@@ -198,10 +220,12 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 					};
 				})(this);
 
-				if(!(this.el in queue)) {
+				if(!(this.el in queue)){
 					firstRun = true;
 					queue[this.el] = [];
-				};
+					f();
+					return;
+				}
 				inQueue ? queue[this.el].push(f) : f();
 			},
 			stop: function(){
