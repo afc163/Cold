@@ -317,7 +317,7 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 				'duration' : duration,
 				'onComplete' : callback,
 				'easing' : easing
-			}, option);
+			});
 			anim.start();
 		}
 		else{
@@ -330,16 +330,16 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 			'duration' : duration,
 			'onComplete' : callback,
 			'easing' : easing
-		}, option);
+		});
 		anim.start();
 	};
 
 	var fadeIn = function(el, callback, duration, easing){
 		var anim = new _effect(el, { opacity : 0 },{
 			'duration' : duration,
-			'onComplete' : function(){},
+			'onComplete' : callback,
 			'easing' : easing
-		}, option);
+		});
 		anim.start();
 	};
 
@@ -348,16 +348,26 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 			'duration' : duration,
 			'onComplete' : callback,
 			'easing' : easing
-		}, option);
+		});
 		anim.start();
 	};
 
 	var slide = function(el, to, callback, duration, easing){
 		var anim = new _effect(el, { height : to },{
 			'duration' : duration,
-			'onComplete' : function(){},
+			'onComplete' : callback,
 			'easing' : easing
-		}, option);
+		});
+		anim.start();
+	};
+
+	var scrollTo = function(top, callback, duration, easing){
+		var doc = document;
+		var anim = new _effect((doc.documentElement ? doc.documentElement : doc.body), { scrollTop : top },{
+			'duration' : Cold.isFunction(callback) ? duration : callback,
+			'onComplete' : Cold.isFunction(callback) ? callback : $void,
+			'easing' : easing
+		});
 		anim.start();
 	};
 
@@ -369,6 +379,7 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 		fadeIn		: fadeIn,
 		fadeOut		: fadeOut,
 		slide		: slide,
+		scrollTo	: scrollTo,
 		Easing		: Easing
 	};
 });
