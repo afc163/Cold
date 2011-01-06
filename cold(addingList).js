@@ -1,13 +1,13 @@
 //cold.js
 
 (function(){
-	var scriptOnload = document.createElement('script').readyState ?
+	var _scriptOnload = document.createElement('script').readyState ?
 	function(node, callback) {
-		var oldCallback = node.onreadystatechange;
+		var old = node.onreadystatechange;
 		node.onreadystatechange = function(){
 			if ((/loaded|complete/).test(node.readyState)){
 				node.onreadystatechange = null;
-				oldCallback && oldCallback();
+				old && old();
 				callback.call(this);
 			}
 		};
@@ -16,15 +16,20 @@
 		node.addEventListener('load', callback, false);
 	};
 
-	var _cold = {
+	var _checkNs = function(ns){
+		if(!/^\s*Cold/.test(ns)) return 'Cold.' + ns;
+		return ns;
+	};
+
+	var cold = {
 
 		VERSION: '0.0.1',
 
 		BaseURL: (function(){
 			var scripts = document.getElementsByTagName('script'),
 				str = scripts[scripts.length - 1].getAttribute('src'),
-				matchStr = /http:\/\/[^\/]*\//;
-			return (str.match(matchStr) || window.location.href.match(matchStr))[0];
+				re_http = /http:\/\/[^\/]*\//;
+			return (str.match(re_http) || window.location.href.match(re_http))[0];
 		})(),
 
 		cache: {},
@@ -53,23 +58,21 @@
 		},
 
 		add: function(namespace, req, callback){
+			_checkNs(namespace);
 			var names = namespace.split('.'),
 				namesLen = names.length,
 				space = window;
 
 			var func = (function(f){
 				return function(){
-					if(namesLen < 1){
-						throw 'namespace wrong.';
-					}
 					if(!(names[0] in window)){
 						window[names[0]] = {};
 					}
 					for(var i = 0, n; i < namesLen; i++){
 						n = names[i];
 						if(i === namesLen - 1 && typeof f === 'function'){
-							if(space[n])	_cold.extend(space[n], f());
-							else				space[n] = f();
+							if(space[n])	cold.extend(space[n], f());
+							else			space[n] = f();
 							break;
 						}
 						(!space[n]) && ( space[n] = {} );
@@ -78,66 +81,66 @@
 				};
 			})(typeof req === 'function' ? req : callback);
 
-			var addingToList = function(){
-				_cold['addingList'].push(func);
-			};
-
 			//check req
 			if(typeof req !== 'function'){
 				var reqNum = req.length;
-				return _cold.load(req, function(){
-					if(--reqNum === 0){
-						addingToList();
-					}
+				return cold.load(req, function(){
+					--reqNum === 0 && cold['addingList'].push(func);
 				});
 			}
 			else{
-				addingToList();
+				cold['addingList'].push(func);
+				//func();
 			}
-			return _cold;
+			return cold;
 		},
 
 		exec: function(){
-			var adding = _cold['addingList'].shift();
+			var adding = cold['addingList'].shift();
 			typeof adding === 'function' && adding.call();
-			return _cold;
+			return cold;
 		},
 
 		attach: function(){
-			var list = _cold['addingList'], _cold['scripts'] = {}, adding;
+			var list = cold['addingList'], adding;
+			cold['scripts'] = {
+				'loadingNum': 0,
+				'nodes'		: {}
+			};
 			while(adding = list.shift()){
 				typeof adding === 'function' && adding.call();
 			}
-			return _cold;
+			return cold;
 		},
 
 		addScript: function(url, onComplete){
 			var s = document.createElement('script'),
 				head = document.getElementsByTagName('head')[0],
-				cs = _cold.scripts;
+				cs = cold.scripts;
 
 			s.setAttribute('type', 'text/javascript');
 			s.setAttribute('src', url);
 			//for firefox 3.6
 			s.setAttribute('async', true);
 			head.appendChild(s);
-			scriptOnload(s, function(){
+			_scriptOnload(s, function(){
 				onComplete && onComplete.call();
 				head.removeChild(s);
 			});
 			cs.nodes[url] = s;
-			return _cold;
+			return cold;
 		},
 
 		loadSingle: function(namespace, callback){
-			var cs = _cold.scripts,
+			namespace = _checkNs(namespace);
+			var cs = cold.scripts,
 				node = null,
 				getUrl = function(){
 					var url = namespace;
 					if(!(/component|util|task|other/g.test(namespace))){
 						url = namespace.replace(/Cold/i,'Cold.core');
 					}
-					url = _cold.BaseURL + url.replace(/\./g,'/') + '.js';
+					url = cold.BaseURL + url.replace(/\./g,'/') + '.js';
 					return url;
 				};
 			
@@ -148,7 +151,7 @@
 			//从而避免了重复请求的问题，感谢kissy loader的方法
 			else if(cs[namespace] === 'loading'){
 				if(node = cs.nodes[getUrl()]){
-					scriptOnload(node, function(){
+					_scriptOnload(node, function(){
 						callback && callback.call();
 					});
 				}
@@ -158,34 +161,41 @@
 				cs['loadingNum'] 
 					? (cs['loadingNum'] += 1) 
 					: (cs['loadingNum'] = 1);
-				_cold.addScript(getUrl(), function(){
+				cold.addScript(getUrl(), function(){
 					typeof callback === 'function' && callback.call();
 					cs[namespace] = 'loaded';
-					if(--cs['loadingNum'] === 0){
-						_cold.attach();
+					cs['loadingNum'] -= 1;
+					//console.info(cs['loadingNum']);
+					if(cs['loadingNum'] === 0){
+						cold.attach();
 					}
 				});
 			}
-			return _cold;
+			return cold;
 		},
 
 		load: function(namespace, callback){
 			namespace = namespace || [];
 			if(typeof namespace === 'string'){
-				return _cold.loadSingle(namespace, callback);
+				return cold.loadSingle(namespace, callback);
 			}
 			else{
 				for(var i=0, len = namespace.length; i<len; i++){
-					_cold.loadSingle(namespace[i], function(){
+					cold.loadSingle(namespace[i], function(){
 						typeof callback === 'function' && callback.call();
 					});
 				}
 			}
-			return _cold;
+			return cold;
 		}
 	};
 
-	window['Cold'] = _cold;
+	window['Cold'] = cold;
+
+	try{
+		document.domain = window.location.href.match(/http:\/\/(www\.)?([^\/]*)\//)[2];
+		document.execCommand("BackgroundImageCache", false, true);
+	}catch(ex){}
 
 })();
 
@@ -253,7 +263,7 @@ Cold.add('Cold', function(){
 		return true;
 	})();
 		
-	var _ready = function(func){
+	var ready = function(func){
 		if(typeof func !== 'function'){
 			return;
 		}
@@ -265,13 +275,13 @@ Cold.add('Cold', function(){
 		}
 	};
 
-	var _type = {};
+	var type = {};
 	(function(){
 		var _toString = Object.prototype.toString;
 		var objTypes = ['Array', 'Function', 'String', 'Number'];
 		for(var i=0, l=objTypes.length; i<l; i++){
 			(function(i){
-				_type["is" + objTypes[i]] = function(obj){
+				type["is" + objTypes[i]] = function(obj){
 					return _toString.call(obj) === '[object ' + objTypes[i] + ']';
 				};
 			})(i);
@@ -279,12 +289,12 @@ Cold.add('Cold', function(){
 	})();
 
 	return {
-		type		: _type,
-		isArray		: _type.isArray,
-		isFunction	: _type.isFunction,
-		isString	: _type.isString,
-		isNumber	: _type.isNumber,
-		ready		: _ready
+		type		: type,
+		isArray		: type.isArray,
+		isFunction	: type.isFunction,
+		isString	: type.isString,
+		isNumber	: type.isNumber,
+		ready		: ready
 	};
 
 }).exec();

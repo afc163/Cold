@@ -1,14 +1,17 @@
 //anim.js
 
 Cold.add('Cold.anim', ['Cold.dom'], function(){
+
+	//console.info("anim 载入完毕。");
+
 	var _id = Cold.dom.$E,
 		_css = Cold.dom.css,
 		_isStyle = Cold.dom.isStyle;
-		$void = function(){},
-		BACK_CONST = 1.70158,
-		$time = Date.now || function(){
-			return +new Date;
-		};
+		BACK_CONST = 1.70158;
+	var $void = function(){};
+	var $time = Date.now || function(){
+		return +new Date;
+	};
 
 	var Easing = {
 		'linear' : function(t){
@@ -127,7 +130,7 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 		init : function(el, p, prop){
 			var from, to, frgb, trgb, re_rgb = _color.re_RGB;
 
-			frgb = _css(el, p);
+			frgb = _color.getRGB(_css(el, p));
 			frgb = frgb.match(re_rgb);
 			from = [parseInt(frgb[1], 10), parseInt(frgb[2], 10), parseInt(frgb[3], 10)];
 
@@ -189,7 +192,7 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 					else{
 						throw 'anim init: Invalid arguments.';
 					}
-					console.info(p+"| from: "+this.from[p] + " to: " + this.to[p]);
+					//console.info(p+"| from: "+this.from[p] + " to: " + this.to[p]);
 				}
 			},
 			step : function(){

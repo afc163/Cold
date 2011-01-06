@@ -2,17 +2,17 @@ Cold.add('Cold.dom', ['Cold.browser'], function(){
 
 	//console.info("dom 载入完毕。");
 
-	var domCache = Cold['cache']['elems'] = {};
+	var _domCache = Cold['cache']['elems'] = {};
 
 	var selector = function(){
 	};
 
 	var id = function(str){
-		if(domCache[str]){
-			return domCache[str];
+		if(_domCache[str]){
+			return _domCache[str];
 		}
 		if(Cold.isString(str)){
-			return ( domCache[str] = document.getElementById(str) );
+			return ( _domCache[str] = document.getElementById(str) );
 		}
 		return str;
 	};
