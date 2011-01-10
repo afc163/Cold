@@ -3,18 +3,43 @@
 (function(){
 
 	//伪onload，只有在add函数里会被执行
-	var _scriptOnload = function(node, callback){
+	var _onAdd = function(node, onAdd){
 		var old = node.callback;
 		node.callback = function(){
 			node.callback = null;
 			old && old();
-			callback && callback();
+			onAdd && onAdd();
 		};
+	};
+
+	var _scriptOnload = document.createElement('script').readyState ?
+	function(node, callback, onAdd) {
+		var old = node.onreadystatechange;
+		node.onreadystatechange = function(){
+			if ((/loaded|complete/).test(node.readyState)){
+				node.onreadystatechange = null;
+				old && old();
+				callback.call(this);
+			}
+		};
+		onAdd && _onAdd(node, onAdd);
+	} :
+	function(node, callback, onAdd) {
+		node.addEventListener('load', callback, false);
+		onAdd && _onAdd(node, onAdd);
 	};
 
 	var _checkNs = function(ns){
 		if(!/^\s*Cold/.test(ns)) return 'Cold.' + ns;
 		return ns;
+	};
+
+	var _getUrl = function(ns){
+		var url = ns;
+		if(!(/component|util|task|other/g.test(ns))){
+			url = ns.replace(/Cold/i,'Cold.core');
+		}
+		return cold.BaseURL + url.replace(/\./g,'/') + '.js';
 	};
 
 	var cold = {
@@ -51,12 +76,13 @@
             }
 		},
 
-		add: function(namespace, req, callback){
+		//namespace必须与文件路径相对应,namspace是获得当前文件路径的唯一标识
+		add: function(namespace, req, doFunc){
 			_checkNs(namespace);
 			var names = namespace.split('.'),
 				namesLen = names.length,
 				space = window,
-				node = cold.scripts.nodes[cold.getUrl(namespace)];
+				node = cold.scripts.nodes[_getUrl(namespace)];
 			var func = (function(f){
 				return function(){
 					if(!(names[0] in window)){
@@ -74,7 +100,7 @@
 					}
 					node && node.callback && node.callback();
 				};
-			})(typeof req === 'function' ? req : callback);
+			})(typeof req === 'function' ? req : doFunc);
 
 			//check req
 			if(typeof req !== 'function' && req.length > 0){
@@ -89,7 +115,7 @@
 			return cold;
 		},
 
-		addScript: function(url, onComplete){
+		addScript: function(url, onComplete, onAdd){
 			var s = document.createElement('script'),
 				head = document.getElementsByTagName('head')[0],
 				cs = cold.scripts;
@@ -101,24 +127,18 @@
 			_scriptOnload(s, function(){
 				onComplete && onComplete.call();
 				head.removeChild(s);
+			}, function(){
+				onAdd && onAdd();
 			});
 			cs.nodes[url] = s;
 			return cold;
 		},
 
-		getUrl: function(ns){
-			var url;
-			if(!(/component|util|task|other/g.test(ns))){
-				url = ns.replace(/Cold/i,'Cold.core');
-			}
-			return cold.BaseURL + url.replace(/\./g,'/') + '.js';
-		},
-
 		loadSingle: function(namespace, callback){
 			namespace = _checkNs(namespace);
 			var cs = cold.scripts,
-				node = null,
-				URL = cold.getUrl(namespace);
+				URL = _getUrl(namespace),
+				node = cs.nodes[URL];
 			
 			if(cs[namespace] === 'loaded'){
 				typeof callback === 'function' && callback.call();
@@ -126,11 +146,9 @@
 			//通过缓存所有script节点，给正在载入的script添加onload事件
 			//从而避免了重复请求的问题，感谢kissy loader的方法
 			else if(cs[namespace] === 'loading'){
-				if(node = cs.nodes[URL]){
-					_scriptOnload(node, function(){
-						callback && callback.call();
-					});
-				}
+				node && _scriptOnload(node, function(){
+					callback && callback.call();
+				});
 			}
 			else{
 				cs[namespace] = 'loading';
@@ -138,9 +156,10 @@
 					? (cs['loadingNum'] += 1) 
 					: (cs['loadingNum'] = 1);
 				cold.addScript(URL, function(){
-					typeof callback === 'function' && callback.call();
 					cs[namespace] = 'loaded';
 					cs['loadingNum'] -= 1;
+				},function(){
+					typeof callback === 'function' && callback.call();
 				});
 			}
 			return cold;
@@ -167,7 +186,7 @@
 	try{
 		document.domain = window.location.href.match(/http:\/\/(www\.)?([^\/]*)\//)[2];
 		document.execCommand("BackgroundImageCache", false, true);
-	}catch(ex){}
+	}catch(e){}
 
 })();
 
@@ -197,11 +216,12 @@ Cold.add('Cold', function(){
 			return;
 		}
 		if(_isComplete() === false){
-			timer = setTimeout(arguments.callee, 10);
+			timer = setTimeout(arguments.callee, 5);
 			return;
 		}
 		timer && clearTimeout(timer);
 		_execReady.call();
+		Cold.scripts.nodes = {};
 	};
 
 	var readyBounded = (function(){
@@ -211,7 +231,6 @@ Cold.add('Cold', function(){
 		var doc = document,
 			win = window,
 			dscroll = doc.documentElement.doScroll;
-
 		//w3c mode
 		if(doc.addEventListener){
 			doc.addEventListener('DOMContentLoaded', _coldReady, false);

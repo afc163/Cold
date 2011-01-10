@@ -4,9 +4,6 @@ Cold.add('Cold.dom', ['Cold.browser'], function(){
 
 	var _domCache = Cold['cache']['elems'] = {};
 
-	var selector = function(){
-	};
-
 	var id = function(str){
 		if(_domCache[str]){
 			return _domCache[str];
@@ -123,14 +120,17 @@ Cold.add('Cold.dom', ['Cold.browser'], function(){
 			else{
 				return _getCurrentStyle(el, style);
 			};
+			return el;
 		}
 		else{
 			style = style || {};
+			var styleText = '';
 			for(var s in style){
 				s.toLowerCase() === 'opacity'
 					? opacity(el, style[s])
-					: ( el.style[_camelize(s)] = style[s] );
+					: ( styleText += s + ':' + style[s] + ';');
 			}
+			el.style.cssText += (el.style.cssText === '' ? '' : ';') + styleText;
 			return el;
 		}
 	};
@@ -279,8 +279,6 @@ Cold.add('Cold.dom', ['Cold.browser'], function(){
 	};
 
 	return {
-		selector	: selector,
-		$			: selector,
 		id			: id,
 		$E			: id,
 		$C			: create,

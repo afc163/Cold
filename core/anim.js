@@ -6,10 +6,10 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 
 	var _id = Cold.dom.$E,
 		_css = Cold.dom.css,
-		_isStyle = Cold.dom.isStyle;
-		BACK_CONST = 1.70158;
-	var $void = function(){};
-	var $time = Date.now || function(){
+		_isStyle = Cold.dom.isStyle,
+		BACK_CONST = 1.70158,
+		$void = function(){},
+		$time = Date.now || function(){
 		return +new Date;
 	};
 
@@ -361,7 +361,19 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 		anim.start();
 	};
 
+	var getXY = function(el){
+		el = _id(el);
+		var x = 0, y = 0;
+		while(el.parentNode){
+
+		}
+	};
+
 	var scrollTo = function(top, callback, duration, easing){
+		var anchor = top.match(/\s*#(.*)\s*/);
+		if(anchor){
+			top = getXY(_id(anchor[1]))['y'];
+		}
 		var doc = document;
 		var anim = new _effect((doc.documentElement ? doc.documentElement : doc.body), { scrollTop : top },{
 			'duration' : Cold.isFunction(callback) ? duration : callback,
