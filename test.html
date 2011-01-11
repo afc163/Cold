@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv=X-UA-Compatible content=IE=EmulateIE7 />
+<title>cold test</title>
+<style type="text/css">
+*{
+margin:0;
+padding:0;
+}
+.num{
+padding: 0.5em 2em;
+margin: 2em 0 0 0;
+color:red;
+}
+.test{
+border:1px dashed #ccc;
+margin: 0 2em 2em 2em;
+padding: 1em;
+}
+</style>
+<script type="text/javascript" src="http://www.ilovespringna.com/cold/cold.js"></script>
+</head>
+<body>
+<div class="content">
+	<div class="num">--1--</div>
+	<div class="test" id="test1">测试数据</div>
+	<div class="num">--2--</div>
+	<div class="test" id="test2">测试数据</div>
+	<div class="num">--3--</div>
+	<div class="test" id="test3">测试数据</div>
+	<div class="num">--4--</div>
+	<div class="test" id="test4">测试数据</div>
+	<div class="num">--5--</div>
+	<div class="test" id="test5">测试数据</div>
+	<div class="num">--6--</div>
+	<div class="test" id="test6">测试数据</div>
+	<div class="num">--7--</div>
+	<div class="test" id="test7">测试数据</div>
+	<div class="num">--8--</div>
+	<div class="test" id="test8">测试数据</div>
+	<div class="num">--9--</div>
+	<div class="test" id="test9">测试数据</div>
+	<div class="num">--10--</div>
+	<div class="test" id="test10">测试数据</div>
+	<div class="num">--11--</div>
+	<div class="test" id="test11">测试数据</div>
+	<div class="num">--12--</div>
+	<div class="test" id="test12">测试数据</div>
+</div>
+<script type="text/javascript">
+//Cold.load('component.calendar');
+Cold.load('event');
+Cold.load('ajax');
+Cold.load('dom');
+Cold.load('browser');
+Cold.load('sizzle');
+Cold.load('anim');
+
+
+Cold.ready(function(){
+
+	var T = {};
+	for(var i=1; i<=8; i++){
+		T['test'+i] = Cold.dom.$E('test'+i);
+	}
+
+	//--1--
+	var str = "";
+	var fun = function(){};
+	var arr = [1,2];
+	var num = 234;
+	T['test1'].innerHTML += "<br />" + "str is string: " + Cold.isString(str);
+	T['test1'].innerHTML += "<br />" + "fun is function: " + Cold.isFunction(fun);
+	T['test1'].innerHTML += "<br />" + "arr is array: " + Cold.isArray(arr);
+	T['test1'].innerHTML += "<br />" + "num is number: " + Cold.isNumber(num);
+	Cold.$('#test1')[0].innerHTML += "<br />" + 'sizzle worked.';
+
+	//--2--
+	var handler = function(){
+		T['test2'].innerHTML = "飘过就成这个样子了。";
+		T['test2'].style.color = 'red';
+		T['test2'].style.border = '1px solid blue';
+		T['test2'].style.fontSize = '18px';
+	};
+
+	Cold.event.add(T['test2'], 'click', handler);
+
+	Cold.event.add(T['test2'], 'mouseover', function(){
+		Cold.event.fire(T['test2'], 'click');
+	});
+
+	//--3--
+	var s = '';
+	for(var b in Cold.browser){
+		var type = typeof Cold.browser[b];
+		if(type !== 'function' && type !== 'object'){
+			s += (b+' : '+ Cold.browser[b] +'<br />');
+		}
+	}
+	T['test3'].innerHTML = s + Cold.browser.detect();
+	
+	//--4--
+	Cold.ajax.get('http://www.ilovespringna.com/Cold/test.php', {
+		data: {
+			'username' : 'afc163',
+			'password' : '123456'
+		},
+		returnType: 'text',
+		onSuccess: function(data){
+			T['test4'].innerHTML = data || '测试数据';
+		}
+	});
+	
+	//--5--
+	Cold.dom.css(T['test5'], 'background', '#f90');
+	Cold.dom.css(T['test5'], {
+		'color'			: 'green',
+		'font-weight'	: 'bold',
+		'border'		: '2px solid #000',
+		'padding'		: '10px',
+		'opacity'		: 0.5
+	});
+	Cold.dom.val(T['test5'], 'value', '测试数据已改变。');
+	Cold.dom.val(T['test5'], {
+		'autorun'	: 'true',
+		'inittime'	: 'rightnow'
+	});
+	var h = '';
+	h += Cold.dom.val(T['test5'], 'value');
+	h += '<br />class test的数量有' + Cold.dom.$CN("test").length + '个。';
+	h += "color : " + Cold.dom.css(T['test5'], 'color') + '<br />';
+	h += "left : " + Cold.dom.css(T['test5'], 'left') + '<br />';
+	h += "position : " + Cold.dom.css(T['test5'], 'position') + '<br />';
+	h += "margin-top : " + Cold.dom.css(T['test5'], 'margin-top') + '<br />';
+	h += "margin-right : " + Cold.dom.css(T['test5'], 'margin-right') + '<br />';
+	h += "opacity : " + Cold.dom.css(T['test5'], 'opacity') + '<br />';
+	T['test5'].innerHTML = h;
+	T['test5'].innerHTML += "width : " + Cold.dom.width(T['test5']);
+	T['test5'].innerHTML += " | height : " + Cold.dom.height(T['test5']) + '<br />';
+
+	//--6--
+	var test6son = Cold.dom.$C('<div id="test6son" style="border:1px solid #000;color:red;font-weight:bold">基准节点</div>');
+	Cold.dom.appendEnd(T['test6'], test6son);
+	var no1 = Cold.dom.$C('<div><p>no.1</p></div>');
+	var no2 = Cold.dom.$C('<div><p>no.2</p></div>');
+	var no3 = Cold.dom.$C('<div><p>no.3</p></div>');
+	var no4 = Cold.dom.$C('<div><p>no.4</p></div>');
+	Cold.dom.insertBefore(test6son, no1);
+	Cold.dom.appendFront(test6son, no2);
+	Cold.dom.appendEnd(test6son, no3);
+	Cold.dom.insertAfter(test6son, no4);
+	Cold.dom.insertBefore(test6son, '<div>text1</div>');
+	Cold.dom.appendFront(test6son, '<div>text2</div>');
+	Cold.dom.appendEnd(test6son, '<div>text3</div>');
+	Cold.dom.insertAfter(test6son, '<div>text4</div>');
+
+	//--7--
+	Cold.dom.html(T['test7'], '点击开始动画');
+	Cold.dom.css(T['test7'], {
+		border:'5px blue solid',
+		position:'relative',
+		width:'50px',
+		height:'50px'
+	});
+	Cold.event.add(T['test7'], 'click', function(){
+		
+		Cold.anim.run(T['test7'], { 'width':200, 'height':200 }, function(){
+			Cold.dom.html(T['test7'], '点击开始动画');
+			T['test7'].innerHTML += '<br />动画1完成【高宽变化】';
+		}, 1000, 'bounceOut');
+
+		Cold.anim.queue(T['test7'], { 'left':500 }, function(){
+			T['test7'].innerHTML += '<br />动画3完成【向右移动】';
+		}, 2000, 'easeOut');
+
+		Cold.anim.queue(T['test7'], { 'font-size':12 }, function(){
+			T['test7'].innerHTML += '<br />动画4完成【字体大小变化】';
+		}, 500, 'easeOut');
+
+		Cold.anim.queue(T['test7'], { 'opacity':0.5 }, function(){
+			T['test7'].innerHTML += '<br />动画5完成【透明度变化】';
+		}, 1000, 'easeOut');
+
+		Cold.anim.run(T['test7'], { 'top':50, color:'#09f' },function(){
+			T['test7'].innerHTML += '<br />动画2完成【向下移动，字体颜色变化】';
+		}, 2000, 'easeOut');
+		/*
+		Cold.anim.queue(T['test7'], { 'left':200 }, function(){
+			T['test7'].innerHTML += '<br />动画3完成【向右移动】';
+		}, 2000, 'easeOut');
+		Cold.anim.queue(T['test7'], { 'left':300 }, function(){
+			T['test7'].innerHTML += '<br />动画3完成【向右移动】';
+		}, 2000, 'easeOut');
+		*/
+	});
+
+	//--8--
+	Cold.dom.html(T['test8'], '点击开始滚屏');
+	Cold.event.add(T['test8'], 'click', function(){
+		Cold.anim.scrollTo('100px', 500);
+	});
+});
+</script>
+<script src="http://s96.cnzz.com/stat.php?id=1991856&web_id=1991856" language="JavaScript"></script>
+</body>
+</html>

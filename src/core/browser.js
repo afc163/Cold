@@ -1,4 +1,4 @@
-Cold.add("Cold.browser", function(){
+Cold.add('Cold.browser', function(){
 
 	//console.info("browser 载入完毕。");
 
@@ -6,7 +6,8 @@ Cold.add("Cold.browser", function(){
 
 	var browser = {
 		platform: navigator.platform,
-		engine	: {
+		features: {xpath: !!(document.evaluate), air: !!(window.runtime), query: !!(document.querySelector)},
+		engine : {
 			presto: function(){
 				return (!window.opera) ? false : ((arguments.callee.caller) ? 960 : ((document.getElementsByClassName) ? 950 : 925));
 			},
@@ -14,14 +15,28 @@ Cold.add("Cold.browser", function(){
 				return (!window.ActiveXObject) ? false : ((window.XMLHttpRequest) ? ((document.querySelectorAll) ? 6 : 5) : 4);
 			},
 			webkit: function(){
-				return (navigator.taintEnabled) ? false : ((Browser.Features.xpath) ? ((Browser.Features.query) ? 525 : 420) : 419);
+				return (navigator.taintEnabled) ? false : ((browser.features.xpath) ? ((browser.features.query) ? 525 : 420) : 419);
 			},
 			gecko: function(){
 				return (!document.getBoxObjectFor && window.mozInnerScreenX == null) ? false : ((document.getElementsByClassName) ? 19 : 18);
 			}
 		},
-		detect	: function(){
-		
+		detect : function(){
+			var info = '';
+			for(var eng in this.engine){
+				var e = this.engine[eng]();
+				if(e !== false){
+					info += 'engine:'+eng + ' ' + e;
+					break;
+				}
+			}
+			for(var b in this){
+				if(this[b] === true){
+					info += ' browser:' + b + ' ' + this['version'];
+					break;
+				}
+			}
+			return info;
 		},
 		version : (_ua.match(/.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [0, '0'])[1],
 		msie	: /msie/.test(_ua),
@@ -34,7 +49,5 @@ Cold.add("Cold.browser", function(){
 	browser.ie6 = browser.msie && parseInt(browser.version) === 6;
 	browser.ie7 = browser.msie && parseInt(browser.version) === 7;
 	browser.ie8 = browser.msie && parseInt(browser.version) === 8;
-
 	return browser;
-
 });

@@ -1,32 +1,15 @@
-//cold.js
+//Cold.js
 
 (function(){
 
 	//伪onload，只有在add函数里会被执行
-	var _onAdd = function(node, onAdd){
+	var _scriptOnload = function(node, callback){
 		var old = node.callback;
 		node.callback = function(){
 			node.callback = null;
 			old && old();
-			onAdd && onAdd();
+			callback && callback();
 		};
-	};
-
-	var _scriptOnload = document.createElement('script').readyState ?
-	function(node, callback, onAdd) {
-		var old = node.onreadystatechange;
-		node.onreadystatechange = function(){
-			if ((/loaded|complete/).test(node.readyState)){
-				node.onreadystatechange = null;
-				old && old();
-				callback.call(this);
-			}
-		};
-		onAdd && _onAdd(node, onAdd);
-	} :
-	function(node, callback, onAdd) {
-		node.addEventListener('load', callback, false);
-		onAdd && _onAdd(node, onAdd);
 	};
 
 	var _checkNs = function(ns){
@@ -35,16 +18,19 @@
 	};
 
 	var _getUrl = function(ns){
-		var url = ns;
+		var url = ns, debug = Cold.DEBUG ? '/src' : '/bulid';
 		if(!(/component|util|task|other/g.test(ns))){
-			url = ns.replace(/Cold/i,'Cold.core');
+			url = ns.replace(/cold/i,'cold.core');
 		}
-		return cold.BaseURL + url.replace(/\./g,'/') + '.js';
+		url = url.replace(/\./g,'/');
+		return Cold.BaseURL + url.replace(/cold/i, 'cold' + debug) + '.js';
 	};
 
-	var cold = {
+	window['Cold'] = {
 
 		VERSION: '0.0.1',
+
+		DEBUG: true,
 
 		BaseURL: (function(){
 			var scripts = document.getElementsByTagName('script'),
@@ -76,27 +62,29 @@
             }
 		},
 
-		//namespace必须与文件路径相对应,namspace是获得当前文件路径的唯一标识
 		add: function(namespace, req, doFunc){
-			_checkNs(namespace);
-			var names = namespace.split('.'),
+			var ns = _checkNs(namespace),
+				names = ns.split('.'),
 				namesLen = names.length,
 				space = window,
-				node = cold.scripts.nodes[_getUrl(namespace)];
+				node = Cold.scripts.nodes[_getUrl(ns)];
 			var func = (function(f){
 				return function(){
-					if(!(names[0] in window)){
-						window[names[0]] = {};
-					}
-					for(var i = 0, n; i < namesLen; i++){
-						n = names[i];
-						if(i === namesLen - 1 && typeof f === 'function'){
-							if(space[n])	cold.extend(space[n], f());
-							else			space[n] = f();
-							break;
+					var obj = typeof f === 'function' && f();
+					if(obj != null) {	//当add里的函数无返回值时，不在namespace上附加属性
+						if(!(names[0] in window)){
+							window[names[0]] = {};
 						}
-						(!space[n]) && ( space[n] = {} );
-						space = space[n];
+						for(var i = 0, n; i < namesLen; i++){
+							n = names[i];
+							if(i === namesLen - 1){
+								if(space[n])	Cold.extend(space[n], obj);
+								else			space[n] = obj;
+								break;
+							}
+							(!space[n]) && ( space[n] = {} );
+							space = space[n];
+						}
 					}
 					node && node.callback && node.callback();
 				};
@@ -105,20 +93,20 @@
 			//check req
 			if(typeof req !== 'function' && req.length > 0){
 				var reqNum = req.length;
-				return cold.load(req, function(){
+				return Cold.load(req, function(){
 					--reqNum === 0 && func();
 				});
 			}
 			else{
 				func();
 			}
-			return cold;
+			return Cold;
 		},
 
-		addScript: function(url, onComplete, onAdd){
+		addScript: function(url, onComplete){
 			var s = document.createElement('script'),
 				head = document.getElementsByTagName('head')[0],
-				cs = cold.scripts;
+				cs = Cold.scripts;
 			s.setAttribute('type', 'text/javascript');
 			s.setAttribute('src', url);
 			//for firefox 3.6
@@ -127,61 +115,56 @@
 			_scriptOnload(s, function(){
 				onComplete && onComplete.call();
 				head.removeChild(s);
-			}, function(){
-				onAdd && onAdd();
 			});
 			cs.nodes[url] = s;
-			return cold;
+			return Cold;
 		},
 
 		loadSingle: function(namespace, callback){
-			namespace = _checkNs(namespace);
-			var cs = cold.scripts,
-				URL = _getUrl(namespace),
+			var ns = _checkNs(namespace),
+				cs = Cold.scripts,
+				URL = _getUrl(ns),
 				node = cs.nodes[URL];
 			
-			if(cs[namespace] === 'loaded'){
+			if(cs[ns] === 'loaded'){
 				typeof callback === 'function' && callback.call();
 			}
 			//通过缓存所有script节点，给正在载入的script添加onload事件
 			//从而避免了重复请求的问题，感谢kissy loader的方法
-			else if(cs[namespace] === 'loading'){
+			else if(cs[ns] === 'loading'){
 				node && _scriptOnload(node, function(){
 					callback && callback.call();
 				});
 			}
 			else{
-				cs[namespace] = 'loading';
+				cs[ns] = 'loading';
 				cs['loadingNum'] 
 					? (cs['loadingNum'] += 1) 
 					: (cs['loadingNum'] = 1);
-				cold.addScript(URL, function(){
-					cs[namespace] = 'loaded';
+				Cold.addScript(URL, function(){
+					typeof callback === 'function' && callback();
+					cs[ns] = 'loaded';
 					cs['loadingNum'] -= 1;
-				},function(){
-					typeof callback === 'function' && callback.call();
 				});
 			}
-			return cold;
+			return Cold;
 		},
 
 		load: function(namespace, callback){
 			namespace = namespace || [];
 			if(typeof namespace === 'string'){
-				return cold.loadSingle(namespace, callback);
+				return Cold.loadSingle(namespace, callback);
 			}
 			else{
 				for(var i=0, len = namespace.length; i<len; i++){
-					cold.loadSingle(namespace[i], function(){
+					Cold.loadSingle(namespace[i], function(){
 						typeof callback === 'function' && callback.call();
 					});
 				}
 			}
-			return cold;
+			return Cold;
 		}
 	};
-
-	window['Cold'] = cold;
 
 	try{
 		document.domain = window.location.href.match(/http:\/\/(www\.)?([^\/]*)\//)[2];
@@ -211,7 +194,7 @@ Cold.add('Cold', function(){
 		funcList = [];
 	};
 
-	var _coldReady = function(){
+	var _ColdReady = function(){
 		if(executed === true){
 			return;
 		}
@@ -228,19 +211,17 @@ Cold.add('Cold', function(){
 		if(readyBounded){
 			return;
 		}
-		var doc = document,
-			win = window,
-			dscroll = doc.documentElement.doScroll;
+		var dscroll = document.documentElement.doScroll;
 		//w3c mode
-		if(doc.addEventListener){
-			doc.addEventListener('DOMContentLoaded', _coldReady, false);
-			win.addEventListener('load', _coldReady, false);
+		if(document.addEventListener){
+			document.addEventListener('DOMContentLoaded', _ColdReady, false);
+			window.addEventListener('load', _ColdReady, false);
 		}
 		//ie mode
 		else{
-			doc.attachEvent('onreadystatechange', _coldReady);
-			win.attachEvent('onload', _coldReady);
-			if(dscroll && win == win.top){
+			document.attachEvent('onreadystatechange', _ColdReady);
+			window.attachEvent('onload', _ColdReady);
+			if(dscroll && window == window.top){
 				(function(){
 					try{
 						dscroll('left');
