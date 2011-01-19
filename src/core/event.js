@@ -62,9 +62,40 @@ Cold.add('Cold.event', function(){
 		return true;
 	};
 
+	var hover = function(elem, over, out, relateElems){
+		var timeout = 100;
+		addEvent(elem, "mouseover", function(){
+			elem.over = true;
+			setTimeout(function(){
+				if(elem.over === true){
+					over && over();
+				}
+			},timeout);
+		});
+		addEvent(elem, "mouseout", function(){
+			elem.over = false;
+			setTimeout(function(){
+				if(elem.over === false){
+					out && out();
+				}
+			},timeout);
+		});
+	};
+
+	var toggle = function(elem, click1, click2){
+		var num = 0;
+		click1 = click1 || function(){};
+		click2 = click2 || function(){};
+		addEvent(elem, "click", function(){
+			(num++)%2 === 0 ? click1() : click2();
+		});
+	};
+
 	return {
 		add		: addEvent,
 		remove	: delEvent,
-		fire	: fireEvent
+		fire	: fireEvent,
+		hover	: hover,
+		toggle	: toggle
 	};
 });

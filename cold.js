@@ -247,7 +247,11 @@ Cold.add('Cold', function(){
 		}
 	};
 
-	var type = {};
+	var type = {
+		isNull : function(){
+			
+		}
+	};
 	(function(){
 		var _toString = Object.prototype.toString;
 		var objTypes = ['Array', 'Function', 'String', 'Number'];
@@ -260,12 +264,14 @@ Cold.add('Cold', function(){
 		}
 	})();
 
+
 	return {
 		type		: type,
 		isArray		: type.isArray,
 		isFunction	: type.isFunction,
 		isString	: type.isString,
 		isNumber	: type.isNumber,
+		isNull		: type.isNull
 		ready		: ready
 	};
 

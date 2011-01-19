@@ -70,7 +70,7 @@ Cold.add('Cold.dom', ['Cold.browser'], function(){
 	var opacity = function(el, opacity){
 		var ret;
 		el = id(el);
-		if(opacity){
+		if(opacity != null){
 			el.style.opacity = opacity;
 			el.style.filter = 'alpha(opacity=' + opacity*100 + ')';
 			if(el.filters){
@@ -112,7 +112,7 @@ Cold.add('Cold.dom', ['Cold.browser'], function(){
 	var css = function(el, style, value){
 		el = id(el);
 		if(Cold.isString(style)){
-			if(!!value){
+			if(value != null){
 				style.toLowerCase() === 'opacity'
 					? opacity(el, value)
 					: ( el.style[_camelize(style)] = value );
@@ -138,7 +138,7 @@ Cold.add('Cold.dom', ['Cold.browser'], function(){
 	var val = function(el, prop, value){
 		el = id(el);
 		if(Cold.isString(prop)){
-			if(!!value) el.setAttribute(prop, value);
+			if(value != null) el.setAttribute(prop, value);
 			else		return el.getAttribute(prop);
 		}
 		else{

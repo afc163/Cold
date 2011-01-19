@@ -184,7 +184,7 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 						this.from[p] = c[0];
 						this.to[p] = c[1];
 					}
-					else if(temp){
+					else if(temp != null){
 						this.from[p] = parseFloat(this.el[p] || _css(this.el, p));
 						this.to[p] = temp[1] || temp;
 						this.unit[p] = temp[3] || 'px';
@@ -198,6 +198,7 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 			step : function(){
 				var now = $time();
 				//console.info(this.begin + " " + now + " " + this.end);
+				//console.info(this.duration);
 				if(now < this.end){
 					this.update((now - this.begin) / this.duration);
 				}
