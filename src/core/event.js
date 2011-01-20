@@ -4,89 +4,115 @@ Cold.add('Cold.event', function(){
 
 	//console.info("event 载入完毕。");
 
-	var id = function(elem){
-		return elem = Cold.isString(elem) ? document.getElementById(elem) : elem;
+	var id = function(el){
+		return el = Cold.isString(el) ? document.getElementById(el) : el;
 	};
 
-	var addEvent = function(elem, eventType, func){
-		elem = id(elem);
+	var addEvent = function(el, eventType, func){
+		el = id(el);
 		eventType = eventType || 'click';
 
-		if(!elem || elem.nodeType === 3 || elem.nodeType === 8 || !Cold.isFunction(func)){
+		if(!el || el.nodeType === 3 || el.nodeType === 8 || !Cold.isFunction(func)){
 			return false;
 		}
 
-		if(elem.addEventListener){
-			elem.addEventListener(eventType, func, false);
+		if(el.addEventListener){
+			el.addEventListener(eventType, func, false);
 		}
-		else if(elem.attachEvent){
-			elem.attachEvent('on' + eventType, func);
+		else if(el.attachEvent){
+			el.attachEvent('on' + eventType, func);
 		}
 		else{
-			elem['on' + eventType] = func;
+			el['on' + eventType] = func;
 		}
 		return true;
 	};
 
-	var delEvent = function(elem, eventType, func){
-		elem = id(elem);
+	var delEvent = function(el, eventType, func){
+		el = id(el);
 		eventType = eventType || 'click';
-		if(!elem || elem.nodeType === 3 || elem.nodeType === 8 || !Cold.isFunction(func)){
+		if(!el || el.nodeType === 3 || el.nodeType === 8 || !Cold.isFunction(func)){
 			return false;
 		}
 
-		if(elem.removeEventListener){
-			elem.removeEventListener(eventType, func, false);
+		if(el.removeEventListener){
+			el.removeEventListener(eventType, func, false);
 		}
-		else if(elem.detachEvent){
-			elem.detachEvent('on' + eventType, func);
+		else if(el.detachEvent){
+			el.detachEvent('on' + eventType, func);
 		}
 		else{
-			elem['on' + eventType] = null;
+			el['on' + eventType] = null;
 		}
 		return true;
 	};
 
-	var fireEvent = function(elem, eventType){
-		elem = id(elem);
+	var fireEvent = function(el, eventType){
+		el = id(el);
 		eventType = eventType || 'click';
 
-		if(elem.fireEvent){
-			elem.fireEvent('on' + eventType);  
+		if(el.fireEvent){
+			el.fireEvent('on' + eventType);  
 		}
 		else{  
 			var evt = document.createEvent('HTMLEvents');
 			evt.initEvent(eventType, true, true);
-			elem.dispatchEvent(evt);
+			el.dispatchEvent(evt);
 		}
 		return true;
 	};
 
-	var hover = function(elem, over, out, relateElems){
-		var timeout = 100;
-		addEvent(elem, "mouseover", function(){
-			elem.over = true;
-			setTimeout(function(){
-				if(elem.over === true){
-					over && over();
-				}
-			},timeout);
-		});
-		addEvent(elem, "mouseout", function(){
-			elem.over = false;
-			setTimeout(function(){
-				if(elem.over === false){
-					out && out();
-				}
-			},timeout);
-		});
+	var click = function(el, func){
+		return addEvent(el, 'click', func);
 	};
 
-	var toggle = function(elem, click1, click2){
+	var hover = function(el, over, out, showElems){
+		var timeout = 100,
+			timer = null,
+			overFn = function(){
+				timer && clearTimeout(timer);
+				timer = setTimeout(function(){
+					if(el.over === true){
+						over && over();
+					}
+				},timeout);
+			},
+			outFn = function(){
+				timer && clearTimeout(timer);
+				timer = setTimeout(function(){
+					if(el.over === false){
+						out && out();
+					}
+				},timeout);
+			};
+		showElems = showElems || [];
+
+		addEvent(el, 'mouseover', function(){
+			el.over = true;
+			overFn();
+		});
+		addEvent(el, 'mouseout', function(){
+			el.over = false;
+			outFn();
+		});
+
+		for(var i=0, se, l=showElems.length; se = showElems[i]; i++){
+			addEvent(se, 'mouseover', function(){
+				el.over = true;
+				overFn();
+			});
+			addEvent(se, 'mouseout', function(){
+				el.over = false;
+				outFn();
+			});
+		}
+	};
+
+	var toggle = function(el, click1, click2){
 		var num = 0;
 		click1 = click1 || function(){};
 		click2 = click2 || function(){};
-		addEvent(elem, "click", function(){
+		click(el, function(){
 			(num++)%2 === 0 ? click1() : click2();
 		});
 	};
@@ -95,6 +121,7 @@ Cold.add('Cold.event', function(){
 		add		: addEvent,
 		remove	: delEvent,
 		fire	: fireEvent,
+		click	: click,
 		hover	: hover,
 		toggle	: toggle
 	};

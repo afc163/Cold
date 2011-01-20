@@ -7,6 +7,7 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 	var _id = Cold.dom.$E,
 		_css = Cold.dom.css,
 		_isStyle = Cold.dom.isStyle,
+		_getXY = Cold.dom.getXY,
 		BACK_CONST = 1.70158,
 		$void = function(){},
 		$time = Date.now || function(){
@@ -217,6 +218,7 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 						_css(this.el, p, pos);
 					}
 					else{
+						//console.info(this.el + " " + p + " " + pos);
 						this.el[p] = pos;
 					}
 				}
@@ -362,21 +364,13 @@ Cold.add('Cold.anim', ['Cold.dom'], function(){
 		anim.start();
 	};
 
-	var getXY = function(el){
-		el = _id(el);
-		var x = 0, y = 0;
-		while(el.parentNode){
-
-		}
-	};
-
 	var scrollTo = function(top, callback, duration, easing){
 		var anchor = top.match(/\s*#(.*)\s*/);
 		if(anchor){
-			top = getXY(_id(anchor[1]))['y'];
+			top = _getXY(_id(anchor[1]))['y'];
 		}
-		var doc = document;
-		var anim = new _effect((doc.documentElement ? doc.documentElement : doc.body), { scrollTop : top },{
+		var doc = document, docElem = doc.documentElement;
+		var anim = new _effect((docElem.scrollTop ? docElem : doc.body), { scrollTop : top },{
 			'duration' : Cold.isFunction(callback) ? duration : callback,
 			'onComplete' : Cold.isFunction(callback) ? callback : $void,
 			'easing' : easing

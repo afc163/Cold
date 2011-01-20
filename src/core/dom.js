@@ -67,10 +67,46 @@ Cold.add('Cold.dom', ['Cold.browser'], function(){
 		return String(str).replace(/\-(\w)/g, function(a, b){ return b.toUpperCase(); });
 	};
 
+	var _hasClass = function(el, className){
+		var cn = el.className,
+			cns = cn.split(' ');
+		for(var i=0, l=cns.length; i<l; i++){
+			if(cns[i] === className){
+				return true;
+			}
+		}
+		return false;
+	};
+
+	var addClass = function(el, className){
+		if(!_hasClass(el, className)){
+			el.className = ( el.className == null )
+							? className 
+							: el.className + ' ' + className;
+		}
+	};
+
+	var removeClass = function(el, className){
+		var cn = el.className,
+			cns = cn.split(' ');
+		for(var i=0, l=cns.length; i<l; i++){
+			if(cns[i] === className){
+				cns[i] = '';
+			}
+		}
+		el.className = cns.join(' ');
+	};
+
 	var opacity = function(el, opacity){
 		var ret;
 		el = id(el);
 		if(opacity != null){
+			if(css(el, 'display') === 'none'){
+				css(el, 'display', 'block');
+			}
+			if(css(el, 'visibility') === 'hidden'){
+				css(el, 'visibility', 'visible');
+			}
 			el.style.opacity = opacity;
 			el.style.filter = 'alpha(opacity=' + opacity*100 + ')';
 			if(el.filters){
@@ -278,6 +314,31 @@ Cold.add('Cold.dom', ['Cold.browser'], function(){
 		return h < 0 ? 0 : h;
 	};
 
+	var getScroll = function(doc){
+		return {
+			'left' : Math.max(doc.documentElement.scrollLeft, doc.body.scrollLeft),
+			'top' : Math.max(doc.documentElement.scrollTop, doc.body.scrollTop)
+		};
+	};
+
+	var getXY = function(el){
+		var x = 0, y = 0, doc = el.ownerDocument, docElem = doc.documentElement,
+			scrolls = getScroll(doc),
+			clientTop = docElem.clientTop || doc.body.clientTop || 0,
+			clientLeft = docElem.clientLeft || doc.body.clientLeft || 0;
+		if(el.getBoundingClientRect){
+			x = el.getBoundingClientRect().left + scrolls['left'] - clientLeft;
+            y = el.getBoundingClientRect().top + scrolls['top'] - clientTop;
+		}
+		else{
+			do{
+				x += el.offsetLeft;
+				x += el.offsetTop;
+			}while(el = el.offsetParent);
+		}
+		return { 'x' : x, 'y' : y };
+	};
+
 	return {
 		id			: id,
 		$E			: id,
@@ -286,6 +347,8 @@ Cold.add('Cold.dom', ['Cold.browser'], function(){
 		$CN			: $CN,
 		$T			: $T,
 		isStyle		: isStyle,
+		addClass	: addClass,
+		removeClass	: removeClass,
 		css			: css,
 		val			: val,
 		html		: html,
@@ -295,7 +358,9 @@ Cold.add('Cold.dom', ['Cold.browser'], function(){
 		appendFront	: appendFront,
 		appendEnd	: appendEnd,
 		width		: width,
-		height		: height
+		height		: height,
+		getScrolls	: getScroll,
+		getXY		: getXY
 	};
 	
 });
