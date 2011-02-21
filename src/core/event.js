@@ -1,4 +1,4 @@
-Cold.add('Cold.event', function(){
+Cold.add('event', function(){
 
 	//var _eventsList = {};
 

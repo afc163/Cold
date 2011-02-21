@@ -1320,7 +1320,7 @@ var posProcess = function( selector, context ) {
 };
 
 // EXPOSE
-Cold.add('Cold.sizzle', function(){
+Cold.add('sizzle', function(){
 	Cold.$ = Sizzle; 
 });
 })();

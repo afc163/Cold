@@ -1,4 +1,4 @@
-Cold.add('Cold.dom', ['Cold.browser'], function(){
+Cold.add('dom', ['browser'], function(){
 
 	//console.info("dom 载入完毕。");
 
@@ -323,12 +323,7 @@ Cold.add('Cold.dom', ['Cold.browser'], function(){
 		return h < 0 ? 0 : h;
 	};
 
-	var getScroll = function(doc){
-		return {
-			'left' : Math.max(doc.documentElement.scrollLeft, doc.body.scrollLeft),
-			'top' : Math.max(doc.documentElement.scrollTop, doc.body.scrollTop)
-		};
-	};
+	var getScroll = Cold.browser.scroll;
 
 	var getXY = function(el){
 		var x = 0, y = 0, doc = el.ownerDocument, docElem = doc.documentElement,
@@ -369,7 +364,6 @@ Cold.add('Cold.dom', ['Cold.browser'], function(){
 		remove		: remove,
 		width		: width,
 		height		: height,
-		getScrolls	: getScroll,
 		getXY		: getXY
 	};
 	

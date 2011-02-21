@@ -1,6 +1,6 @@
 //anim.js
 
-Cold.add('Cold.anim', ['Cold.dom'], function(){
+Cold.add('anim', ['dom'], function(){
 
 	//console.info("anim 载入完毕。");
 

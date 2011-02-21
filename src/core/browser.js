@@ -1,4 +1,4 @@
-Cold.add('Cold.browser', function(){
+Cold.add('browser', function(){
 
 	//console.info("browser 载入完毕。"); 
 
@@ -49,5 +49,36 @@ Cold.add('Cold.browser', function(){
 	browser.ie6 = browser.msie && parseInt(browser.version) === 6;
 	browser.ie7 = browser.msie && parseInt(browser.version) === 7;
 	browser.ie8 = browser.msie && parseInt(browser.version) === 8;
+
+	browser.winSize = function(doc){
+		var w, h;
+		doc = doc || document;
+		if(window.innerHeight){
+			w = window.innerWidth;
+			h = window.innerHeight;
+		}
+		else if(doc.documentElement && doc.documentElement.clientHeight){
+			w = doc.documentElement.clientWidth;
+			h = doc.documentElement.clientHeight;
+		}
+		else{
+			w = doc.body.clientWidth;
+			h = doc.body.clientHeight;
+		}
+		return { width:w, height:h };
+	};
+
+	browser.pageSize = function(doc){
+		doc = doc || document;
+	};
+
+	browser.scroll = function(doc){
+		doc = doc || document;
+		return {
+			'left' : Math.max(doc.documentElement.scrollLeft, doc.body.scrollLeft),
+			'top' : Math.max(doc.documentElement.scrollTop, doc.body.scrollTop)
+		};
+	};
+
 	return browser;
 });

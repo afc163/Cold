@@ -1,4 +1,4 @@
-Cold.add("Cold.ajax",function(){
+Cold.add("ajax", function(){
 
 	var _jsonToQuery = function(data){
 		if(Cold.isString(data)){
