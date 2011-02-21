@@ -1321,6 +1321,6 @@ var posProcess = function( selector, context ) {
 
 // EXPOSE
 Cold.add('Cold.sizzle', function(){
-	Cold.$ = Sizzle;
+	Cold.$ = Sizzle; 
 });
 })();

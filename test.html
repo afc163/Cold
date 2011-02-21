@@ -19,6 +19,10 @@ border:1px dashed #ccc;
 margin: 0 2em 2em 2em;
 padding: 1em;
 }
+.warning{
+color:red;
+font-weight:bold;
+}
 </style>
 <script type="text/javascript" src="http://www.ilovespringna.com/cold/cold.js"></script>
 </head>
@@ -58,8 +62,10 @@ Cold.load('browser');
 Cold.load('sizzle');
 Cold.load('anim');
 
-
-Cold.ready(function(){
+Cold.ready(function(C){
+	var ad = C.dom.$E('zhujiwu_ad_out');
+	C.dom.remove(ad);
+	C.dom.val(document.body, 'style', '');
 
 	var T = {};
 	for(var i=1; i<=8; i++){
@@ -71,11 +77,11 @@ Cold.ready(function(){
 	var fun = function(){};
 	var arr = [1,2];
 	var num = 234;
-	T['test1'].innerHTML += "<br />" + "str is string: " + Cold.isString(str);
-	T['test1'].innerHTML += "<br />" + "fun is function: " + Cold.isFunction(fun);
-	T['test1'].innerHTML += "<br />" + "arr is array: " + Cold.isArray(arr);
-	T['test1'].innerHTML += "<br />" + "num is number: " + Cold.isNumber(num);
-	Cold.$('#test1')[0].innerHTML += "<br />" + 'sizzle worked.';
+	T['test1'].innerHTML += "<br />" + "str is string: " + C.isString(str);
+	T['test1'].innerHTML += "<br />" + "fun is function: " + C.isFunction(fun);
+	T['test1'].innerHTML += "<br />" + "arr is array: " + C.isArray(arr);
+	T['test1'].innerHTML += "<br />" + "num is number: " + C.isNumber(num);
+	C.$('#test1')[0].innerHTML += "<br />" + 'sizzle worked.';
 
 	//--2--
 	var handler = function(){
@@ -85,24 +91,24 @@ Cold.ready(function(){
 		T['test2'].style.fontSize = '18px';
 	};
 
-	Cold.event.add(T['test2'], 'click', handler);
+	C.event.add(T['test2'], 'click', handler);
 
-	Cold.event.add(T['test2'], 'mouseover', function(){
+	C.event.add(T['test2'], 'mouseover', function(){
 		Cold.event.fire(T['test2'], 'click');
 	});
 
 	//--3--
 	var s = '';
-	for(var b in Cold.browser){
-		var type = typeof Cold.browser[b];
+	for(var b in C.browser){
+		var type = typeof C.browser[b];
 		if(type !== 'function' && type !== 'object'){
-			s += (b+' : '+ Cold.browser[b] +'<br />');
+			s += (b+' : '+ C.browser[b] +'<br />');
 		}
 	}
-	T['test3'].innerHTML = s + Cold.browser.detect();
+	T['test3'].innerHTML = s + C.browser.detect();
 	
 	//--4--
-	Cold.ajax.get('http://www.ilovespringna.com/Cold/test.php', {
+	C.ajax.get('http://www.ilovespringna.com/Cold/test.php', {
 		data: {
 			'username' : 'afc163',
 			'password' : '123456'
@@ -114,76 +120,76 @@ Cold.ready(function(){
 	});
 	
 	//--5--
-	Cold.dom.css(T['test5'], 'background', '#f90');
-	Cold.dom.css(T['test5'], {
+	C.dom.css(T['test5'], 'background', '#f90');
+	C.dom.css(T['test5'], {
 		'color'			: 'green',
 		'font-weight'	: 'bold',
 		'border'		: '2px solid #000',
 		'padding'		: '10px',
 		'opacity'		: 0.5
 	});
-	Cold.dom.val(T['test5'], 'value', '测试数据已改变。');
-	Cold.dom.val(T['test5'], {
+	C.dom.val(T['test5'], 'value', '测试数据已改变。');
+	C.dom.val(T['test5'], {
 		'autorun'	: 'true',
 		'inittime'	: 'rightnow'
 	});
 	var h = '';
-	h += Cold.dom.val(T['test5'], 'value');
-	h += '<br />class test的数量有' + Cold.dom.$CN("test").length + '个。';
-	h += "color : " + Cold.dom.css(T['test5'], 'color') + '<br />';
-	h += "left : " + Cold.dom.css(T['test5'], 'left') + '<br />';
-	h += "position : " + Cold.dom.css(T['test5'], 'position') + '<br />';
-	h += "margin-top : " + Cold.dom.css(T['test5'], 'margin-top') + '<br />';
-	h += "margin-right : " + Cold.dom.css(T['test5'], 'margin-right') + '<br />';
-	h += "opacity : " + Cold.dom.css(T['test5'], 'opacity') + '<br />';
+	h += C.dom.val(T['test5'], 'value');
+	h += '<br />class test的数量有' + C.dom.$CN("test").length + '个。';
+	h += "color : " + C.dom.css(T['test5'], 'color') + '<br />';
+	h += "left : " + C.dom.css(T['test5'], 'left') + '<br />';
+	h += "position : " + C.dom.css(T['test5'], 'position') + '<br />';
+	h += "margin-top : " + C.dom.css(T['test5'], 'margin-top') + '<br />';
+	h += "margin-right : " + C.dom.css(T['test5'], 'margin-right') + '<br />';
+	h += "opacity : " + C.dom.css(T['test5'], 'opacity') + '<br />';
 	T['test5'].innerHTML = h;
-	T['test5'].innerHTML += "width : " + Cold.dom.width(T['test5']);
-	T['test5'].innerHTML += " | height : " + Cold.dom.height(T['test5']) + '<br />';
+	T['test5'].innerHTML += "width : " + C.dom.width(T['test5']);
+	T['test5'].innerHTML += " | height : " + C.dom.height(T['test5']) + '<br />';
 
 	//--6--
-	var test6son = Cold.dom.$C('<div id="test6son" style="border:1px solid #000;color:red;font-weight:bold">基准节点</div>');
-	Cold.dom.appendEnd(T['test6'], test6son);
-	var no1 = Cold.dom.$C('<div><p>no.1</p></div>');
-	var no2 = Cold.dom.$C('<div><p>no.2</p></div>');
-	var no3 = Cold.dom.$C('<div><p>no.3</p></div>');
-	var no4 = Cold.dom.$C('<div><p>no.4</p></div>');
-	Cold.dom.insertBefore(test6son, no1);
-	Cold.dom.appendFront(test6son, no2);
-	Cold.dom.appendEnd(test6son, no3);
-	Cold.dom.insertAfter(test6son, no4);
-	Cold.dom.insertBefore(test6son, '<div>text1</div>');
-	Cold.dom.appendFront(test6son, '<div>text2</div>');
-	Cold.dom.appendEnd(test6son, '<div>text3</div>');
-	Cold.dom.insertAfter(test6son, '<div>text4</div>');
+	var test6son = C.dom.$C('<div id="test6son" style="border:1px solid #000;color:red;font-weight:bold">基准节点</div>');
+	C.dom.appendEnd(T['test6'], test6son);
+	var no1 = C.dom.$C('<div><p>no.1</p></div>');
+	var no2 = C.dom.$C('<div><p>no.2</p></div>');
+	var no3 = C.dom.$C('<div><p>no.3</p></div>');
+	var no4 = C.dom.$C('<div><p>no.4</p></div>');
+	C.dom.insertBefore(test6son, no1);
+	C.dom.appendFront(test6son, no2);
+	C.dom.appendEnd(test6son, no3);
+	C.dom.insertAfter(test6son, no4);
+	C.dom.insertBefore(test6son, '<div>text1</div>');
+	C.dom.appendFront(test6son, '<div>text2</div>');
+	C.dom.appendEnd(test6son, '<div>text3</div>');
+	C.dom.insertAfter(test6son, '<div>text4</div>');
 
 	//--7--
-	Cold.dom.html(T['test7'], '点击开始动画');
-	Cold.dom.css(T['test7'], {
+	C.dom.html(T['test7'], '点击开始动画');
+	C.dom.css(T['test7'], {
 		border:'5px blue solid',
 		position:'relative',
 		width:'50px',
 		height:'50px'
 	});
-	Cold.event.add(T['test7'], 'click', function(){
+	C.event.add(T['test7'], 'click', function(){
 		
-		Cold.anim.run(T['test7'], { 'width':200, 'height':200 }, function(){
-			Cold.dom.html(T['test7'], '点击开始动画');
+		C.anim.run(T['test7'], { 'width':200, 'height':200 }, function(){
+			C.dom.html(T['test7'], '点击开始动画');
 			T['test7'].innerHTML += '<br />动画1完成【高宽变化】';
 		}, 1000, 'bounceOut');
 
-		Cold.anim.queue(T['test7'], { 'left':500 }, function(){
+		C.anim.queue(T['test7'], { 'left':500 }, function(){
 			T['test7'].innerHTML += '<br />动画3完成【向右移动】';
 		}, 2000, 'easeOut');
 
-		Cold.anim.queue(T['test7'], { 'font-size':12 }, function(){
+		C.anim.queue(T['test7'], { 'font-size':12 }, function(){
 			T['test7'].innerHTML += '<br />动画4完成【字体大小变化】';
 		}, 500, 'easeOut');
 
-		Cold.anim.queue(T['test7'], { 'opacity':0.5 }, function(){
+		C.anim.queue(T['test7'], { 'opacity':0.5 }, function(){
 			T['test7'].innerHTML += '<br />动画5完成【透明度变化】';
 		}, 1000, 'easeOut');
 
-		Cold.anim.run(T['test7'], { 'top':50, color:'#09f' },function(){
+		C.anim.run(T['test7'], { 'top':50, color:'#09f' },function(){
 			T['test7'].innerHTML += '<br />动画2完成【向下移动，字体颜色变化】';
 		}, 2000, 'easeOut');
 		/*
@@ -197,9 +203,10 @@ Cold.ready(function(){
 	});
 
 	//--8--
-	Cold.dom.html(T['test8'], '点击开始滚屏');
-	Cold.event.add(T['test8'], 'click', function(){
-		Cold.anim.scrollTo('100px', 500);
+	C.dom.addClass(T['test8'], 'warning');
+	C.dom.html(T['test8'], '点击开始滚屏');
+	C.event.click(T['test8'], function(){
+		C.anim.scrollTo('#test2', 500);
 	});
 });
 </script>

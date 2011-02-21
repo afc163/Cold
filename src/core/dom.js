@@ -302,6 +302,12 @@ Cold.add('Cold.dom', ['Cold.browser'], function(){
 		return insert(el, html, 'afterend');
 	};
 
+	var remove = function(el){
+		if(el){
+			return el.parentNode.removeChild(el);
+		}
+	};
+
 	var	_hidden = Cold.IE && css(el, 'display') === 'none', w, h;
 	var width = function(el){
 		el = id(el);
@@ -357,6 +363,7 @@ Cold.add('Cold.dom', ['Cold.browser'], function(){
 		insertAfter	: insertAfter,
 		appendFront	: appendFront,
 		appendEnd	: appendEnd,
+		remove		: remove,
 		width		: width,
 		height		: height,
 		getScrolls	: getScroll,

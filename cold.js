@@ -189,7 +189,7 @@ Cold.add('Cold', function(){
 		}
 		executed = true;
 		for(var i=0, l=funcList.length; i < l; i++){
-			funcList[i].call();
+			funcList[i](Cold);
 		}
 		funcList = [];
 	};
@@ -240,7 +240,7 @@ Cold.add('Cold', function(){
 			return;
 		}
 		if(executed === true || (/loaded|complete/).test(document.readyState.toLowerCase())){
-			func.call();
+			func(Cold);
 		}
 		else{
 			funcList.push(func);

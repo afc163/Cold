@@ -133,5 +133,5 @@ Cold.add("Cold.ajax",function(){
 		getXml		: getXml,
 		getText		: getText
 	};
-	
+
 });
