@@ -111,6 +111,9 @@ Cold.add('Cold.dom', ['Cold.browser'], function(){
 			el.style.filter = 'alpha(opacity=' + opacity*100 + ')';
 			if(el.filters){
 				el.style.zoom = 1;
+				if(opacity == 1){
+					el.style.zoom = '';
+				}
 			}
 		}
 		else{

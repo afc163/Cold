@@ -2,10 +2,10 @@
 
 (function(){
 
-	//伪onload，只有在add函数里会被执行
+	//伪onload，只在add函数之后执行
 	var _scriptOnload = function(node, callback){
 		var old = node.callback;
-		node.callback = function(){
+		node.callback = node.onerror = function(){
 			node.callback = null;
 			old && old();
 			callback && callback();
@@ -90,6 +90,8 @@
 				};
 			})(typeof req === 'function' ? req : doFunc);
 
+			//js file loaded
+			Cold.scripts[ns] = 'loaded';
 			//check req
 			if(typeof req !== 'function' && req.length > 0){
 				var reqNum = req.length;
@@ -126,7 +128,8 @@
 				URL = _getUrl(ns),
 				node = cs.nodes[URL];
 			
-			if(cs[ns] === 'loaded'){
+			//当状态为loaded时，文件已经载入，但是尚未执行attach。判断其发生了循环依赖的问题，使其依赖无效
+			if(cs[ns] === 'attached' || cs[ns] === 'loaded'){
 				typeof callback === 'function' && callback.call();
 			}
 			//通过缓存所有script节点，给正在载入的script添加onload事件
@@ -143,7 +146,7 @@
 					: (cs['loadingNum'] = 1);
 				Cold.addScript(URL, function(){
 					typeof callback === 'function' && callback();
-					cs[ns] = 'loaded';
+					cs[ns] = 'attached';
 					cs['loadingNum'] -= 1;
 				});
 			}
