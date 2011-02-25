@@ -87,6 +87,7 @@ Cold.add("ajax", function(){
 		}
 		XHR.open(method, url, op.async);
 		XHR.setRequestHeader('Content-Type', op.contentType + ';charset=' + op.charset.toLowerCase());
+		XHR.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 		XHR.send( (method === 'post') ? _jsonToQuery(data) : null);
 		return XHR;
 	};

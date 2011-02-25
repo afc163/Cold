@@ -1,8 +1,8 @@
 //anim.js
-
+Cold.log("anim add。");
 Cold.add('anim', ['dom'], function(){
 
-	//console.info("anim 载入完毕。");
+	Cold.log("anim 载入完毕。");
 
 	var _id = Cold.dom.$E,
 		_css = Cold.dom.css,
@@ -293,8 +293,8 @@ Cold.add('anim', ['dom'], function(){
 	var _runBuilder = function(inQueue){
 		inQueue = inQueue || false;
 		return function(el, props, callback, duration, easing){
+			var option = {};
 			if(Cold.isFunction(callback)){
-				option = {};
 				option.onComplete = callback;
 				option.duration = duration;
 				option.easing = easing;

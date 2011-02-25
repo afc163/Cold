@@ -66,9 +66,12 @@ Cold.add('event', function(){
 		return addEvent(el, 'click', func);
 	};
 
-	var hover = function(el, over, out, showElems){
+	var hover = function(el, option){
 		var timeout = 100,
 			timer = null,
+			over = option.over || function(){},
+			out = option.out || function(){},
+			showElems = option.elems || [],
 			overFn = function(){
 				timer && clearTimeout(timer);
 				timer = setTimeout(function(){
@@ -85,7 +88,6 @@ Cold.add('event', function(){
 					}
 				},timeout);
 			};
-		showElems = showElems || [];
 
 		addEvent(el, 'mouseover', function(){
 			el.over = true;

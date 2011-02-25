@@ -1,6 +1,7 @@
+Cold.log("browser add。");
 Cold.add('browser', function(){
 
-	//console.info("browser 载入完毕。"); 
+	Cold.log("browser 载入完毕。"); 
 
 	var _ua = navigator.userAgent.toLowerCase();
 

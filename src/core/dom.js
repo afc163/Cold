@@ -1,6 +1,7 @@
+Cold.log("dom add。");
 Cold.add('dom', ['browser'], function(){
 
-	//console.info("dom 载入完毕。");
+	Cold.log("dom 载入完毕。");
 
 	var _domCache = Cold['cache']['elems'] = {};
 
