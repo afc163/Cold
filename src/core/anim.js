@@ -1,18 +1,18 @@
 //anim.js
-Cold.log("anim add。");
 Cold.add('anim', ['dom'], function(){
 
 	Cold.log("anim 载入完毕。");
 
 	var _id = Cold.dom.$E,
 		_css = Cold.dom.css,
+		_create = Cold.dom.create,
 		_isStyle = Cold.dom.isStyle,
 		_getXY = Cold.dom.getXY,
 		BACK_CONST = 1.70158,
 		$void = function(){},
 		$time = Date.now || function(){
-		return +new Date;
-	};
+			return +new Date;
+		};
 
 	var Easing = {
 		'linear' : function(t){
@@ -147,16 +147,29 @@ Cold.add('anim', ['dom'], function(){
 		this.init.apply(this, arguments);
 	};
 
+	var _getTransitionName = function(){
+		var name = 'transition', tempEl = _create('div'), prefixs = ['Webkit', 'Moz', 'O'];
+        if (tempEl.style[name] === undefined) {
+			for(var i=0; i<prefixs.length; i++){
+				if(tempEl.style[name = prefixs[i] + 'Transition'] !== undefined){
+					return name;
+				}
+			}
+        }
+        return name;
+	};
+
 	_effect.DefaultOption = {
-		'fps'		: 25,
-		'duration'	: 1000,
-		'onStart'	: $void,
-		'onComplete': $void,
+		'fps'			: 25,
+		'duration'		: 1000,
+		'onStart'		: $void,
+		'onComplete'	: $void,
 		/*
-		'onPause'	: $void,
-		'onResume'	: $void,
+		'onPause'		: $void,
+		'onResume'		: $void,
 		*/
-		'easing'	: 'linear'
+		'easing'		: 'linear',
+		'css3support'	: true
 	};
 
 	_effect.prototype = (function(){
@@ -173,6 +186,10 @@ Cold.add('anim', ['dom'], function(){
 				Cold.extend(_effect.DefaultOption, option, true);
 				Cold.extend(this, _effect.DefaultOption, true);
 				//this.current = 0;
+
+				if(this.css3support){
+					this.transitionName = _getTransitionName();
+				}
 			},
 			initData : function(){
 				this.begin = $time();
@@ -189,17 +206,28 @@ Cold.add('anim', ['dom'], function(){
 						this.from[p] = parseFloat(this.el[p] || _css(this.el, p));
 						this.to[p] = temp[1] || temp;
 						this.unit[p] = temp[3] || 'px';
+
+						//修复firefox对left,top等定位属性在css3 transition下,如果没有left等属性就没有动画效果的问题
+						if(this.transitionName === 'MozTransition' && /top|left|right|bottom/i.test(p)){
+							//if(!this.el.style[p]){
+							//	_css(this.el, p, _css(this.el, p));
+							//}
+							//上面的方法理论上能解决，但是实际上不知道为什么，偶尔才能成功
+							//在setTimeout中改变style之前，如果有alert或是log之类的输出函数，就能保证代码正确
+							//又是一个输出影响执行顺序的问题，崩溃了！！！暂时的解决方案是取消对这几个属性采用传统的动画方式
+							this.transitionName = '';
+						}
 					}
 					else{
 						throw 'anim init: Invalid arguments.';
 					}
-					//console.info(p+"| from: "+this.from[p] + " to: " + this.to[p]);
+					//Cold.log(p+"| from: "+this.from[p] + " to: " + this.to[p]);
 				}
 			},
 			step : function(){
 				var now = $time();
-				//console.info(this.begin + " " + now + " " + this.end);
-				//console.info(this.duration);
+				//Cold.log(this.begin + " " + now + " " + this.end);
+				//Cold.log(this.duration);
 				if(now < this.end){
 					this.update((now - this.begin) / this.duration);
 				}
@@ -214,11 +242,11 @@ Cold.add('anim', ['dom'], function(){
 					var pos = this.compute(this.from[p], this.to[p], progress);
 					if(_isStyle(this.el, p)){
 						if(p !== 'opacity' && !_color.isColorStyle(p)) pos = parseInt(pos, 10) + this.unit[p];
-						//console.info(this.from[p] + " " + pos + " " + this.to[p]);
+						//Cold.log(this.from[p] + " " + pos + " " + this.to[p]);
 						_css(this.el, p, pos);
 					}
 					else{
-						//console.info(this.el + " " + p + " " + pos);
+						//Cold.log(this.el + " " + p + " " + pos);
 						this.el[p] = pos;
 					}
 				}
@@ -246,33 +274,52 @@ Cold.add('anim', ['dom'], function(){
 			start : function(inQueue){
 				this.stop();
 
-				var firstRun = false;
+				var firstRun = false, f;
 				inQueue = inQueue || false;
-
+				var _uncamelize = function(str){
+					return String(str).replace(/[A-Z]/g, '-$&').toLowerCase();
+				};
 				var f = (function(that){
 					return function(){
-						that.initData();
-						
-						var old = that.onComplete, next;
-						that.onStart && that.onStart();
+							that.initData();
+							var old = that.onComplete, next;
+							that.onStart && that.onStart();
 
-						that.onComplete = function(){
-							old && old();
-							if(firstRun || inQueue){
-								//console.info(queue[that.el].length);
-								next = queue[that.el].shift();
-								next ? next() : delete queue[that.el];
+							that.onComplete = function(){
+								old && old();
+								if(firstRun || inQueue){
+									//Cold.log(queue[that.el].length);
+									next = queue[that.el].shift();
+									next ? next() : delete queue[that.el];
+								}
+							};
+							//css3动画效果
+							if(that.transitionName){
+								Cold.log('css3 anim.');
+								//设定css3动画style
+								that.el.style[that.transitionName] = 'all '+ that.duration + 'ms ' + _uncamelize(that.easing);
+								//设定最后的样式
+								setTimeout(function(){
+									that.update(1);
+								}, 0);
+								//到时间后停止并回调
+								setTimeout(function(){
+									that.stop();
+									that.onComplete && that.onComplete();
+								}, that.duration);
+							}
+							//正常动画
+							else{
+								Cold.log('tandition anim.');
+								that.timer = setInterval(function(){
+									if(that.paused){
+										that.end += that.fps;
+										return;
+									}
+									that.step.call(that);
+								}, that.fps || _effect.DefaultOption.fps);
 							}
 						};
-
-						that.timer = setInterval(function(){
-							if(that.paused){
-								that.end += that.fps;
-								return;
-							}
-							that.step.call(that);
-						}, that.fps || _effect.DefaultOption.fps);
-					};
 				})(this);
 
 				if(!(this.el in queue)){
@@ -284,8 +331,13 @@ Cold.add('anim', ['dom'], function(){
 				inQueue ? queue[this.el].push(f) : f();
 			},
 			stop: function(){
-				this.timer && clearInterval(this.timer);
-				this.timer = null;
+				if(this.transitionName){
+					_css(this.el, this.transitionName, '');
+				}
+				else{
+					this.timer && clearInterval(this.timer);
+					this.timer = null;
+				}
 			}
 		};
 	})();

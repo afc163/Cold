@@ -5,9 +5,9 @@
 	var _scriptOnload = document.createElement('script').readyState ?
 		function(node, callback) {
 			var old = node.onreadystatechange;
-			node.onreadystatechange = function(){
+			node.onreadystatechange = node.onerror = function(){
 				if ((/loaded|complete/).test(node.readyState)){
-					node.onreadystatechange = null;
+					node.onreadystatechange = node.onerror = null;
 					old && old();
 					callback.call(this);
 				}
@@ -21,7 +21,7 @@
 	var _onAdd = function(node, callback){
 		var old = node.callback;
 		node.callback = node.onerror = function(){
-			node.callback = null;
+			node.callback = node.onerror = null;
 			old && old();
 			callback && callback();
 		};
@@ -176,7 +176,6 @@
 				cs = Cold.scripts,
 				URL = _getUrl(ns),
 				node = cs.nodes[URL];
-			
 			//当状态为attached时，依赖项已经存在，直接执行便可
 			if(cs[ns] === 'attached'){
 				typeof callback === 'function' && callback.call();
@@ -218,7 +217,7 @@
 		}
 	};
 
-	Cold.log = ( Cold.DEBUG && console.log ) ? console.log : function(){};
+	Cold.log = ( Cold.DEBUG && window.console ) ? function(msg){ console.log(msg); } : function(){};
 
 	try{
 		document.domain = window.location.href.match(/http:\/\/(www\.)?([^\/]*)\//)[2];

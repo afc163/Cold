@@ -1,4 +1,3 @@
-Cold.log("dom add。");
 Cold.add('dom', ['browser'], function(){
 
 	Cold.log("dom 载入完毕。");
@@ -66,6 +65,10 @@ Cold.add('dom', ['browser'], function(){
 
 	var _camelize = function(str){
 		return String(str).replace(/\-(\w)/g, function(a, b){ return b.toUpperCase(); });
+	};
+
+	var _uncamelize = function(str){
+		return String(str).replace(/[A-Z]/g, '-$&').toLowerCase();
 	};
 
 	var _hasClass = function(el, className){
@@ -168,7 +171,7 @@ Cold.add('dom', ['browser'], function(){
 			for(var s in style){
 				s.toLowerCase() === 'opacity'
 					? opacity(el, style[s])
-					: ( styleText += s + ':' + style[s] + ';');
+					: ( styleText += _uncamelize(s) + ':' + style[s] + ';');
 			}
 			el.style.cssText += (el.style.cssText === '' ? '' : ';') + styleText;
 			return el;

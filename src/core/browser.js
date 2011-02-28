@@ -1,4 +1,3 @@
-Cold.log("browser add。");
 Cold.add('browser', function(){
 
 	Cold.log("browser 载入完毕。"); 
