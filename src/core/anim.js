@@ -155,8 +155,9 @@ Cold.add('anim', ['dom'], function(){
 					return name;
 				}
 			}
+			return null;
         }
-        return name;
+        return 'transition';
 	};
 
 	_effect.DefaultOption = {
@@ -189,6 +190,18 @@ Cold.add('anim', ['dom'], function(){
 
 				if(this.css3support){
 					this.transitionName = _getTransitionName();
+					//修复firefox对left,top等定位属性在css3 transition下,如果没有定义left等属性就没有动画效果的问题
+					if(this.transitionName === 'MozTransition'){
+						for(var p in this.props){
+							if(/top|left|right|bottom/i.test(p) && !this.el.style[p]){
+								_css(this.el, p, _css(this.el, p));
+							}
+						}
+					}
+					//记录有多少css动画效果
+					this.el.css3AnimNum || this.el.css3AnimNum === 1
+										? this.el.css3AnimNum++
+										: ( this.el.css3AnimNum = 1 );
 				}
 			},
 			initData : function(){
@@ -206,17 +219,6 @@ Cold.add('anim', ['dom'], function(){
 						this.from[p] = parseFloat(this.el[p] || _css(this.el, p));
 						this.to[p] = temp[1] || temp;
 						this.unit[p] = temp[3] || 'px';
-
-						//修复firefox对left,top等定位属性在css3 transition下,如果没有left等属性就没有动画效果的问题
-						if(this.transitionName === 'MozTransition' && /top|left|right|bottom/i.test(p)){
-							//if(!this.el.style[p]){
-							//	_css(this.el, p, _css(this.el, p));
-							//}
-							//上面的方法理论上能解决，但是实际上不知道为什么，偶尔才能成功
-							//在setTimeout中改变style之前，如果有alert或是log之类的输出函数，就能保证代码正确
-							//又是一个输出影响执行顺序的问题，崩溃了！！！暂时的解决方案是取消对这几个属性采用传统的动画方式
-							this.transitionName = '';
-						}
 					}
 					else{
 						throw 'anim init: Invalid arguments.';
@@ -272,7 +274,7 @@ Cold.add('anim', ['dom'], function(){
 				this.stop();
 			},
 			start : function(inQueue){
-				this.stop();
+				!this.transitionName && this.stop();
 
 				var firstRun = false, f;
 				inQueue = inQueue || false;
@@ -296,10 +298,12 @@ Cold.add('anim', ['dom'], function(){
 							//css3动画效果
 							if(that.transitionName){
 								Cold.log('css3 anim.');
-								//设定css3动画style
-								that.el.style[that.transitionName] = 'all '+ that.duration + 'ms ' + _uncamelize(that.easing);
-								//设定最后的样式
+								var transition = 'all '+ that.duration + 'ms ' + _uncamelize(that.easing);
+								that.el.style[that.transitionName] = transition;
 								setTimeout(function(){
+									//设定css3 transition
+									that.el.style[that.transitionName] = transition;
+									//设定目标样式
 									that.update(1);
 								}, 0);
 								//到时间后停止并回调
@@ -332,7 +336,9 @@ Cold.add('anim', ['dom'], function(){
 			},
 			stop: function(){
 				if(this.transitionName){
-					_css(this.el, this.transitionName, '');
+					if(Cold.isNumber(this.el.css3AnimNum) && --this.el.css3AnimNum === 0){
+						_css(this.el, this.transitionName, '');
+					}
 				}
 				else{
 					this.timer && clearInterval(this.timer);
