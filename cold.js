@@ -153,6 +153,21 @@
 			func();
 		},
 
+		task: function(req, doFunc){
+			if(typeof req === 'function'){
+				req();
+			}
+			else if(req.length > 0){
+				var reqNum = req.length;
+				return Cold.load(req, function(){
+					--reqNum === 0 && doFunc && doFunc();
+				});
+			}
+			else{
+				doFunc && doFunc();
+			}
+		},
+
 		addScript: function(url, onComplete){
 			var s = document.createElement('script'),
 				head = document.getElementsByTagName('head')[0],
