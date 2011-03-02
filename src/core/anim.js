@@ -189,7 +189,9 @@ Cold.add('anim', ['dom'], function(){
 				//this.current = 0;
 
 				if(this.css3support){
-					this.transitionName = _getTransitionName();
+					if(/linear|easeIn|easeOut|easeInOut|cubic-bezier\(.*\)/.test(this.easing)){
+						this.transitionName = _getTransitionName();
+					}
 					//修复firefox对left,top等定位属性在css3 transition下,如果没有定义left等属性就没有动画效果的问题
 					if(this.transitionName === 'MozTransition'){
 						for(var p in this.props){
@@ -336,7 +338,7 @@ Cold.add('anim', ['dom'], function(){
 			},
 			stop: function(){
 				if(this.transitionName){
-					if(Cold.isNumber(this.el.css3AnimNum) && --this.el.css3AnimNum === 0){
+					if(Cold.isNumber(this.el.css3AnimNum) && --this.el.css3AnimNum === 0){ //当最后一个效果结束，去掉transition
 						_css(this.el, this.transitionName, '');
 					}
 				}
