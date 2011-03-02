@@ -134,6 +134,7 @@
 						}
 					}
 					node && node.callback && node.callback();
+					cs[ns] = 'attached';
 				};
 			})(typeof req === 'function' ? req : doFunc);
 
