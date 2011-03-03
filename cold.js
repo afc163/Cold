@@ -1,23 +1,7 @@
 //Cold.js
 
 (function(){
-
-	var _scriptOnload = document.createElement('script').readyState ?
-		function(node, callback) {
-			var old = node.onreadystatechange;
-			node.onreadystatechange = node.onerror = function(){
-				if ((/loaded|complete/).test(node.readyState)){
-					node.onreadystatechange = node.onerror = null;
-					old && old();
-					callback.call(this);
-				}
-			};
-		} :
-		function(node, callback) {
-			node.addEventListener('load', callback, false);
-		};
-
-	//在add函数中执行
+	//伪onload，在add函数中执行
 	var _onAdd = function(node, callback){
 		var old = node.callback;
 		node.callback = node.onerror = function(){
@@ -72,27 +56,54 @@
 	};
 
 	window['Cold'] = {
-
+		/** 
+		* 当前版本
+		* @type String
+		*/
 		VERSION: '0.0.1',
-
+		/** 
+		* 调试模式（true调用未压缩版本并输出调试信息）
+		* @type Boolean
+		*/
 		DEBUG: true,
-
+		/** 
+		* cold.js文件所在的路径
+		* @type String
+		*/
 		BaseURL: (function(){
 			var scripts = document.getElementsByTagName('script'),
 				str = scripts[scripts.length - 1].getAttribute('src'),
 				re_http = /http:\/\/[^\/]*\//;
 			return (str.match(re_http) || window.location.href.match(re_http))[0];
 		})(),
-
+		/** 
+		* 各种对象的缓存区，尚未好好利用
+		* @type Object
+		*/
 		cache: {},
-
+		/** 
+		* 存储模块状态
+		* loadingN : 表示当前正在载入的模块数
+		* nodes : 存储模块所对应的script节点
+		* @type Object
+		*/
 		scripts: {
 			'loadingN': 0,
 			'nodes'		: {}
 		},
-
+		/** 
+		* 存储依赖关系
+		* @type Object
+		*/
 		reqList: {},
-
+		/** 
+		* 扩展对象
+		* @type method
+		* @param {Object} obj 表示被扩展的对象
+		* @param {Object} exobj 扩展对象
+		* @param {Boolean} overwrite 是否复写同名属性
+		* @return {void} 
+		*/
 		extend: function(obj, exobj, overwrite){
 			obj = obj || {};
 			exobj = exobj || {};
@@ -107,7 +118,18 @@
 				}
             }
 		},
-
+		/** 
+		* 模块定义
+		* @type method
+		* @param {String} namespace 模块名，模块命名空间
+		* @param {Array|Function} req 依赖模块表，或doFunc
+		* @param {Function} doFunc 模块执行函数，返回值用于扩展namespace对应的对象
+		× @example
+		* Cold.add('Cold.dom', ['Cold.browser'], function(){
+		*     //...
+		* });
+		* @return Cold
+		*/
 		add: function(namespace, req, doFunc){
 			var ns = _checkNs(namespace),
 				names = ns.split('.'),
@@ -151,8 +173,19 @@
 				});
 			}
 			func();
+			return Cold;
 		},
-
+		/** 
+		* 依赖于某些模块的执行代码，不需要等到domReady就可以执行
+		* @type method
+		* @param {Array|Function} req 依赖模块表，或doFunc
+		* @param {Function} doFunc 具体执行代码，不需要有返回值
+		× @example
+		* Cold.task(['dom', 'ajax'], function(){
+		*     //...
+		* });
+		* @return Cold
+		*/
 		task: function(req, doFunc){
 			if(typeof req === 'function'){
 				req();
@@ -166,8 +199,19 @@
 			else{
 				doFunc && doFunc();
 			}
+			return Cold;
 		},
-
+		/** 
+		* 动态载入js文件
+		* @type method
+		* @param {String} url js文件url
+		* @param {Function} onComplete 回调函数，伪回调，只有当js文件中有Cold.add函数时才会处理回调。因此不建议外部使用这个函数载入js文件
+		× @example
+		* Cold.addScript('http://someurl.com/cold/core/dom.js', function(){
+		*     //...
+		* });
+		* @return Cold
+		*/
 		addScript: function(url, onComplete){
 			var s = document.createElement('script'),
 				head = document.getElementsByTagName('head')[0],
@@ -179,14 +223,18 @@
 			head.appendChild(s);
 			_onAdd(s, function(){
 				onComplete && onComplete.call();
-			});
-			_scriptOnload(s, function(){
 				head.removeChild(s);
 			});
 			cs.nodes[url] = s;
 			return Cold;
 		},
-
+		/** 
+		* 载入单个模块
+		* @type method
+		* @param {String} namespace 模块名
+		* @param {Function} callback 回调函数（放在对应script节点的callback属性中，由add函数进行调用）
+		* @return Cold
+		*/
 		loadSingle: function(namespace, callback){
 			var ns = _checkNs(namespace),
 				cs = Cold.scripts,
@@ -212,11 +260,17 @@
 					typeof callback === 'function' && callback();
 					cs[ns] = 'attached';
 					cs['loadingN'] -= 1;
-				});
+				}, true);
 			}
 			return Cold;
 		},
-
+		/** 
+		* 载入模块，可能是多个
+		* @type method
+		* @param {String|Array} ns 模块名
+		* @param {Function} callback 回调函数
+		* @return Cold
+		*/
 		load: function(ns, callback){
 			ns = ns || [];
 			if(typeof ns === 'string'){
@@ -232,7 +286,10 @@
 			return Cold;
 		}
 	};
-
+	/** 
+	* 输出调试信息，调用console.log；没有console对象时为空函数
+	* @type method
+	*/
 	Cold.log = ( Cold.DEBUG && window.console ) ? function(msg){ console.log(msg); } : function(){};
 
 	try{
@@ -276,8 +333,8 @@ Cold.add('Cold', function(){
 		Cold.scripts.nodes = {};
 	};
 
-	var readyBounded = (function(){
-		if(readyBounded){
+	var _readyBounded = (function(){
+		if(_readyBounded){
 			return;
 		}
 		var dscroll = document.documentElement.doScroll;
@@ -304,6 +361,13 @@ Cold.add('Cold', function(){
 		return true;
 	})();
 		
+	/** 
+	* 定义dom ready且Cold对象Ready时执行的代码
+	* @type method
+	* @param {Function} func 执行函数
+	* @example
+	* Cold.ready(function(){ ... });
+	*/
 	var ready = function(func){
 		if(typeof func !== 'function'){
 			return;
@@ -316,6 +380,10 @@ Cold.add('Cold', function(){
 		}
 	};
 
+	/** 
+	* 对象包括四个函数isArray、isFunction、isString、isNumber，意义明确
+	* @type Object
+	*/
 	var type = {};
 	(function(){
 		var _toString = Object.prototype.toString;
