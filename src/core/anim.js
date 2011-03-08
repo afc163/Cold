@@ -201,9 +201,11 @@ Cold.add('anim', ['dom'], function(){
 						}
 					}
 					//记录有多少css动画效果
-					this.el.css3AnimNum || this.el.css3AnimNum === 1
+					if(this.transitionName){
+						this.el.css3AnimNum || this.el.css3AnimNum === 1
 										? this.el.css3AnimNum++
 										: ( this.el.css3AnimNum = 1 );
+					}
 				}
 			},
 			initData : function(){
@@ -354,7 +356,7 @@ Cold.add('anim', ['dom'], function(){
 		inQueue = inQueue || false;
 		return function(el, props, callback, duration, easing){
 			var option = {};
-			if(Cold.isFunction(callback)){
+			if(Cold.isFunction(callback) || callback === null){
 				option.onComplete = callback;
 				option.duration = duration;
 				option.easing = easing;
@@ -398,7 +400,7 @@ Cold.add('anim', ['dom'], function(){
 	};
 
 	var fadeIn = function(el, callback, duration, easing){
-		var anim = new _effect(el, { opacity : 0 },{
+		var anim = new _effect(el, { opacity : 1 },{
 			'duration' : duration,
 			'onComplete' : callback,
 			'easing' : easing
@@ -407,7 +409,7 @@ Cold.add('anim', ['dom'], function(){
 	};
 
 	var fadeOut = function(el, callback, duration, easing){
-		var anim = new _effect(el, { opacity : 1 },{
+		var anim = new _effect(el, { opacity : 0 },{
 			'duration' : duration,
 			'onComplete' : callback,
 			'easing' : easing

@@ -18,7 +18,7 @@
 
 	var _getUrl = function(ns){
 		var url = ns, debug = Cold.DEBUG ? '/src' : '/bulid';
-		if(!(/component|util|task|other/g.test(ns))){
+		if(!(/app|component|util|task|other/g.test(ns))){
 			url = ns.replace(/cold/i,'cold.core');
 		}
 		url = url.replace(/\./g,'/');
@@ -117,6 +117,7 @@
 					else		return false;
 				}
             }
+			return obj;
 		},
 		/** 
 		* 模块定义
@@ -331,6 +332,7 @@ Cold.add('Cold', function(){
 		timer && clearTimeout(timer);
 		_execReady.call();
 		Cold.scripts.nodes = {};
+		Cold.reqList = {};
 	};
 
 	var _readyBounded = (function(){
@@ -397,9 +399,7 @@ Cold.add('Cold', function(){
 		}
 	})();
 
-
 	return {
-		type		: type,
 		isArray		: type.isArray,
 		isFunction	: type.isFunction,
 		isString	: type.isString,

@@ -1,4 +1,4 @@
-Cold.add('component.lazyLoad', ['event', 'browser', 'dom'], function(){
+Cold.add('app.lazyLoad', ['event', 'browser', 'dom'], function(){
 
 	var _add = Cold.event.add,
 		_remove = Cold.event.remove,

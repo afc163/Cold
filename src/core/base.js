@@ -1,4 +1,4 @@
-//base.js
+//base.js 包括ajax、browser、event、dom
 
 Cold.add('base', function(){
 	Cold.add('browser', function(){

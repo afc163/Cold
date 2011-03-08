@@ -105,17 +105,18 @@ Cold.add('dom', ['browser'], function(){
 		var ret;
 		el = id(el);
 		if(opacity != null){
-			if(css(el, 'display') === 'none'){
+			var show = (opacity !== 0 && opacity !== '');
+			if(show && css(el, 'display') === 'none'){
 				css(el, 'display', 'block');
 			}
-			if(css(el, 'visibility') === 'hidden'){
+			if(show && css(el, 'visibility') === 'hidden'){
 				css(el, 'visibility', 'visible');
 			}
 			el.style.opacity = opacity;
-			el.style.filter = 'alpha(opacity=' + opacity*100 + ')';
-			if(el.filters){
+			if(Cold.browser.ie && Cold.browser.version <= 8){
+				el.style.filter = (opacity === '') ? '' : 'alpha(opacity=' + opacity*100 + ')';
 				el.style.zoom = 1;
-				if(opacity == 1){
+				if(opacity === 1){
 					el.style.zoom = '';
 				}
 			}
@@ -152,7 +153,7 @@ Cold.add('dom', ['browser'], function(){
 		return _camelize(p) in el.style || p in el.style || p === 'opacity';
 	};
 
-	var css = function(el, style, value){
+	var _cssForSingle = function(el, style, value){
 		el = id(el);
 		if(Cold.isString(style)){
 			if(value != null){
@@ -175,6 +176,17 @@ Cold.add('dom', ['browser'], function(){
 			}
 			el.style.cssText += (el.style.cssText === '' ? '' : ';') + styleText;
 			return el;
+		}
+	};
+
+	var css = function(el, style, value){
+		if(Cold.isNumber(el.length)){
+			for(var i=0, l=el.length; i<l; i++){
+				_cssForSingle(el[i], style, value);
+			}
+		}
+		else{
+			return _cssForSingle(el, style, value);
 		}
 	};
 
@@ -358,6 +370,7 @@ Cold.add('dom', ['browser'], function(){
 		addClass	: addClass,
 		removeClass	: removeClass,
 		css			: css,
+		opacity		: opacity,
 		val			: val,
 		html		: html,
 		insert		: insert,
