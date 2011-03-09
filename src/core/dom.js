@@ -123,7 +123,7 @@ Cold.add('dom', ['browser'], function(){
 		}
 		else{
 			if(el.style.filter){
-				ret = /alpha\(opacity=(.*)\)/.match(el.style.filter);
+				ret = el.style.filter.match(/alpha\(opacity=(.*)\)/);
 				ret = (!!ret) ? parseInt(ret[1], 10)/100 : 1.0;
 				return ret;
 			}
