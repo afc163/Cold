@@ -118,6 +118,7 @@ Cold.add('dom', ['browser'], function(){
 				el.style.zoom = 1;
 				if(opacity === 1){
 					el.style.zoom = '';
+					el.style.filter = '';
 				}
 			}
 		}
