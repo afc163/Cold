@@ -1,5 +1,4 @@
 //Cold.js
-
 (function(){
 	//伪onload，在add函数中执行
 	var _onAdd = function(node, callback){
