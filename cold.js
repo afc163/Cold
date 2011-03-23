@@ -140,6 +140,7 @@
 				node = cs.nodes[_getUrl(ns)];
 			var func = (function(f){
 				return function(){
+					if(f['done']) return; //此函数只执行一次
 					var obj = typeof f === 'function' && f();
 					if(obj != null) {	//当add里的函数无返回值时，不在namespace上附加属性
 						if(!(names[0] in window)){
@@ -158,6 +159,7 @@
 					}
 					node && node.callback && node.callback();
 					cs[ns] = 'attached';
+					f['done'] = true;
 				};
 			})(typeof req === 'function' ? req : doFunc);
 
