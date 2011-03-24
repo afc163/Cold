@@ -66,14 +66,14 @@
 		*/
 		DEBUG: true,
 		/** 
-		* cold.js文件所在的路径
+		* cold文件夹所在的路径
 		* @type String
 		*/
 		BaseURL: (function(){
 			var scripts = document.getElementsByTagName('script'),
-				str = scripts[scripts.length - 1].getAttribute('src'),
-				re_http = /http:\/\/[^\/]*\//;
-			return (str.match(re_http) || window.location.href.match(re_http))[0];
+				str = scripts[scripts.length - 1].src,
+				re_base = /(.*)cold\/cold[-min]?\.js/i;
+			return (str.match(re_base) || window.location.href.match(re_base))[1];
 		})(),
 		/** 
 		* 各种对象的缓存区，尚未好好利用
@@ -363,7 +363,6 @@ Cold.add('Cold', function(){
 		}
 		return true;
 	})();
-		
 	/** 
 	* 定义dom ready且Cold对象Ready时执行的代码
 	* @type method
@@ -382,7 +381,19 @@ Cold.add('Cold', function(){
 			funcList.push(func);
 		}
 	};
-
+	/** 
+	* 用于对元素集合执行函数
+	* @type method
+	* @param {Function} func 执行函数
+	* @example
+	* Cold.each(items, function(item){ ... });
+	*/
+	var each = function(items, func){
+		if(!items.length) return;
+		for(var i=0, l=items.length; i<l; i++){
+			if(func.call(null, items[i]) === false)	return;
+		}
+	};
 	/** 
 	* 对象包括四个函数isArray、isFunction、isString、isNumber，意义明确
 	* @type Object
@@ -405,7 +416,8 @@ Cold.add('Cold', function(){
 		isFunction	: type.isFunction,
 		isString	: type.isString,
 		isNumber	: type.isNumber,
-		ready		: ready
+		ready		: ready,
+		each		: each
 	};
 
 });
