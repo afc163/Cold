@@ -197,7 +197,7 @@ Cold.add('app.focus', ['dom', 'anim', 'event'], function(){
 			this.picList = this.el.getElementsByTagName('li');
 			this.length = this.picList && this.picList.length || 0;
 			this.imgList = this.el.getElementsByTagName('IMG');
-			this.config = Cold.extend(_defaultConfig, config, true);
+			this.config = Cold.extend(config, _defaultConfig);
 			this.curr = 0; //初始图片号
 
 			this.showIndex();	//显示图片索引

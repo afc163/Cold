@@ -55,6 +55,12 @@ color: #fff !important;
 font-weight:bold !important;
 border: 1px solid #FD8F07 !important;
 }
+#test11input{
+width:300px;
+height:28px;
+font-size:14px;
+line-height:28px;
+}
 /* app.focus style end */
 </style>
 <script type="text/javascript" src="http://www.ilovespringna.com/cold/cold.js"></script>
@@ -106,7 +112,9 @@ border: 1px solid #FD8F07 !important;
 		</div>
 	</div>
 	<div class="num">--11--</div>
-	<div class="test" id="test11">测试数据</div>
+	<div class="test" id="test11">
+		<input type="text" id="test11input" />
+	</div>
 	<div class="num">--12--</div>
 	<div class="test" id="test12">测试数据</div>
 </div>
@@ -120,6 +128,7 @@ Cold.load('sizzle');
 Cold.load('anim');
 Cold.load('app.lazyLoad');
 Cold.load('app.focus');
+Cold.load('app.suggest');
 
 Cold.ready(function(){
 	var T = {};
@@ -274,6 +283,9 @@ Cold.ready(function(){
 
 	//--10--
 	Cold.app.focus('focus');
+
+	//--11--
+	Cold.app.suggest('test11input', 'http://www.ilovespringna.com/cold/getSuggest.php?wd=');
 });
 </script>
 <script src="http://s96.cnzz.com/stat.php?id=1991856&web_id=1991856" language="JavaScript"></script>

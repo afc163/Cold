@@ -15,7 +15,7 @@ Cold.add("ajax", function(){
 	};
 
 	var _addQuery = function(url, data){
-		return url + '?' + _jsonToQuery(data);
+		return url + ( (url.indexOf('?') != -1) ? '&' : '?' ) + _jsonToQuery(data);
 	};
 
 	var getRequest = function(){
@@ -48,17 +48,15 @@ Cold.add("ajax", function(){
 		if (url == '' || url == null) {
 			throw new Error('ajax need parameter url.');
 		}
-		var XHR = getRequest(),
-			op = _defaultOption,
-			method;
-		Cold.extend(op, option, true);
-		method = op.method.toLowerCase();
+		var XHR = getRequest(), method;
+		Cold.extend(option, _defaultOption);
+		method = option.method.toLowerCase();
 
 		XHR.onreadystatechange = function(){
 			var data = '';
 			if(XHR.readyState === 4){
 				if(XHR.status === 200 || XHR.status === 0){
-					switch(op.returnType){
+					switch(option.returnType){
 						case 'text':
 						case 'html':
 							data = XHR.responseText;
@@ -74,19 +72,19 @@ Cold.add("ajax", function(){
 							data = eval('('+ XHR.responseText +')');
 							break;
 					}
-					op.onSuccess && op.onSuccess(data);
+					option.onSuccess && option.onSuccess(data);
 				}
 				else{
-					op.onError && op.onError();
+					option.onError && option.onError();
 				}
 			}
 		};
-		if(op.data && method === 'get'){
-			op.data['rd'] = new Date().valueOf();
-			url = _addQuery(url, op.data);
+		if(option.data && method === 'get'){
+			option.data['rd'] = new Date().valueOf();
+			url = _addQuery(url, option.data);
 		}
-		XHR.open(method, url, op.async);
-		XHR.setRequestHeader('Content-Type', op.contentType + ';charset=' + op.charset.toLowerCase());
+		XHR.open(method, url, option.async);
+		XHR.setRequestHeader('Content-Type', option.contentType + ';charset=' + option.charset.toLowerCase());
 		XHR.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 		XHR.send( (method === 'post') ? _jsonToQuery(data) : null);
 		return XHR;
@@ -124,6 +122,10 @@ Cold.add("ajax", function(){
 		option['returnType'] = 'text';
 		return ajax(url, option);
 	};
+
+	var getScript = function(url, callback){
+	
+	};
 	
 	return {
 		getXHR		: getRequest,
@@ -132,7 +134,8 @@ Cold.add("ajax", function(){
 		post		: post,
 		getJson		: getJson,
 		getXml		: getXml,
-		getText		: getText
+		getText		: getText,
+		getScript	: getScript
 	};
 
 });

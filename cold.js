@@ -113,7 +113,7 @@
 				}
 				else{
 					if(!obj[p])	obj[p] = exobj[p];
-					else		return false;
+					else		continue;
 				}
             }
 			return obj;
