@@ -44,6 +44,19 @@
 		}
 	};
 
+	var _baseReplace = function(reqList){
+		var replace = false, cs = Cold.scripts;
+		if(reqList.length && cs['Cold.base'] && /loaded|loading/i.test(cs['Cold.base'])){
+			for(var i=0; i<reqList.length; i++){
+				   if(/(Cold\.)?[browser|anim|ajax|event|dom|base]/i.test(reqList[i])){
+					reqList.splice(i--, 1);
+					replace = true;
+				}
+			}
+			replace && ( reqList[reqList.length] = 'Cold.base' );
+		}
+	};
+
 	var _exist = function(list, item){
 		if(list){
 			for(var i=0,l=list.length; i<l; i++){
@@ -72,7 +85,7 @@
 		BaseURL: (function(){
 			var scripts = document.getElementsByTagName('script'),
 				str = scripts[scripts.length - 1].src,
-				re_base = /(.*)cold\/cold[-min]?\.js/i;
+				re_base = /(.*)cold\/cold(-min)?\.js/i;
 			return (str.match(re_base) || window.location.href.match(re_base))[1];
 		})(),
 		/** 
@@ -169,10 +182,7 @@
 				_checkReq(ns, req);
 			}
 			if(typeof req !== 'function' && req.length > 0){
-				var reqNum = req.length;
-				return Cold.load(req, function(){
-					--reqNum === 0 && func();
-				});
+				return Cold.loadReq(req, func);
 			}
 			func();
 			return Cold;
@@ -193,15 +203,19 @@
 				req();
 			}
 			else if(req.length > 0){
-				var reqNum = req.length;
-				return Cold.load(req, function(){
-					--reqNum === 0 && doFunc && doFunc();
-				});
+				return Cold.loadReq(req, doFunc);
 			}
 			else{
 				doFunc && doFunc();
 			}
 			return Cold;
+		},
+		loadReq : function(req, func){
+			_baseReplace(req);
+			var reqNum = req.length;
+			return Cold.load(req, function(){
+				--reqNum === 0 && func && func();
+			});
 		},
 		/** 
 		* 动态载入js文件

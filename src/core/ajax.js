@@ -102,13 +102,6 @@ Cold.add("ajax", function(){
 		return ajax(url, option);
 	};
 
-	var getJson = function(url, option){
-		option = option || {};
-		option['method'] = 'get';
-		option['returnType'] = 'json';
-		return ajax(url, option);
-	};
-
 	var getXml = function(url, option){
 		option = option || {};
 		option['method'] = 'get';
@@ -132,7 +125,6 @@ Cold.add("ajax", function(){
 		ajax		: ajax,
 		get			: get,
 		post		: post,
-		getJson		: getJson,
 		getXml		: getXml,
 		getText		: getText,
 		getScript	: getScript
