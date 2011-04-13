@@ -14,17 +14,20 @@ Cold.add('app.suggest', ['dom', 'event', 'ajax', 'anim'], function(){
 	var _suggest = {
 		showLayer : function(data){
 			if(!data) return;
-			var layer, top, width, temp, str = '';
+			var layer, top, left, width, temp, str = '';
 			if(!_suggest.layer){
 				layer = dom.create('div');
 				layer.id = 'coldAppSuggestLayer';
-				var parentDiv = _findParentDiv(this.input);
-				top = dom.getXY(parentDiv)['y'] - dom.getXY(this.input)['y'] + dom.height(this.input) + 'px';
+				var parentDiv = _findParentDiv(this.input),
+					pdivPos = dom.getXY(parentDiv),
+					inputPos = dom.getXY(this.input);
+				left = inputPos['x'] - pdivPos['x'] + 'px';
+				top = inputPos['y'] - pdivPos['y'] + dom.height(this.input) + 'px';
 				width = dom.width(this.input) - 2 + 'px';
 				dom.css(layer, {
 					'position'	: 'absolute',
 					'top'		: top,
-					'left'		: '0',
+					'left'		: left,
 					'border'	: '1px solid #999',
 					'border-top': 'none',
 					'width'		: width,
@@ -45,11 +48,11 @@ Cold.add('app.suggest', ['dom', 'event', 'ajax', 'anim'], function(){
 						'margin'		: '0',
 						'padding'		: '6px 8px'
 					});
-					(function(el, index){
+					(function(el, i){
 						event.hover(el, {
 							over : function(){
 								_suggest.over = true;
-								_suggest.index = index;
+								_suggest.index = i;
 								_suggest.selectItem();
 							},
 							out : function(){

@@ -405,7 +405,7 @@ Cold.add('Cold', function(){
 	var each = function(items, func){
 		if(!items.length) return;
 		for(var i=0, l=items.length; i<l; i++){
-			if(func.call(null, items[i]) === false)	return;
+			if(func.call(null, items[i], i) === false)	return;
 		}
 	};
 	/** 
