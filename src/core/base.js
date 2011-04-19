@@ -123,18 +123,18 @@ Cold.add('base', function(){
 		};
 
 		var $CN = function(str, node, tag){
-			if(document.getElementsByClassName){
-				return document.getElementsByClassName(str);
+			node = node || document;
+			if(node.getElementsByClassName){
+				return node.getElementsByClassName(str);
 			}
-			else{   
-				node = node || document;
+			else{
 				tag = tag || '*';
 				var returnElements = [];
 				var els = (tag === '*' && node.all)? node.all : node.getElementsByTagName(tag);
-				var i = els.length;
+				var i = -1, l = els.length;
 				str = str.replace(/\-/g, '\\-');
 				var pattern = new RegExp('(^|\\s)' + str + '(\\s|$)');
-				while(--i >= 0){
+				while(++i < l){
 					if(pattern.test(els[i].className)){
 						returnElements.push(els[i]);
 					}
@@ -255,6 +255,10 @@ Cold.add('base', function(){
 				style = style || {};
 				var styleText = '';
 				for(var s in style){
+					if(!style[s] && s.toLowerCase() !== 'opacity'){
+						el.style[_camelize(s)] = '';
+						continue;
+					}
 					s.toLowerCase() === 'opacity'
 						? opacity(el, style[s])
 						: ( styleText += _uncamelize(s) + ':' + style[s] + ';');
@@ -608,15 +612,12 @@ Cold.add('base', function(){
 		var id = function(el){
 			return el = Cold.isString(el) ? document.getElementById(el) : el;
 		};
-
 		var addEvent = function(el, eventType, func){
 			el = id(el);
 			eventType = eventType || 'click';
-
 			if(!el || el.nodeType === 3 || el.nodeType === 8 || !Cold.isFunction(func)){
 				return false;
 			}
-
 			if(el.addEventListener){
 				el.addEventListener(eventType, func, false);
 			}
@@ -635,7 +636,6 @@ Cold.add('base', function(){
 			if(!el || el.nodeType === 3 || el.nodeType === 8 || !Cold.isFunction(func)){
 				return false;
 			}
-
 			if(el.removeEventListener){
 				el.removeEventListener(eventType, func, false);
 			}
@@ -646,6 +646,16 @@ Cold.add('base', function(){
 				el['on' + eventType] = null;
 			}
 			return true;
+		};
+
+		var fixEvent = function(e){
+			e = e || window.event;
+			if (!e.target) {
+				e.target = e.srcElement;
+				e.pageX = e.x;
+				e.pageY = e.y;
+			}
+			return e;
 		};
 
 		var fireEvent = function(el, eventType){
@@ -724,6 +734,7 @@ Cold.add('base', function(){
 			add		: addEvent,
 			remove	: delEvent,
 			fire	: fireEvent,
+			fix		: fixEvent,
 			click	: click,
 			hover	: hover,
 			toggle	: toggle

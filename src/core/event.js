@@ -8,14 +8,12 @@ Cold.add('event', function(){
 		return el = Cold.isString(el) ? document.getElementById(el) : el;
 	};
 
-	var addEvent = function(el, eventType, func){
+	var addEvent = function(el, eventType, func, context){
 		el = id(el);
 		eventType = eventType || 'click';
-
 		if(!el || el.nodeType === 3 || el.nodeType === 8 || !Cold.isFunction(func)){
 			return false;
 		}
-
 		if(el.addEventListener){
 			el.addEventListener(eventType, func, false);
 		}
@@ -34,7 +32,6 @@ Cold.add('event', function(){
 		if(!el || el.nodeType === 3 || el.nodeType === 8 || !Cold.isFunction(func)){
 			return false;
 		}
-
 		if(el.removeEventListener){
 			el.removeEventListener(eventType, func, false);
 		}
@@ -45,6 +42,16 @@ Cold.add('event', function(){
 			el['on' + eventType] = null;
 		}
 		return true;
+	};
+
+	var fixEvent = function(e){
+		e = e || window.event;
+		if (!e.target) {
+			e.target = e.srcElement;
+			e.pageX = e.x;
+			e.pageY = e.y;
+		}
+		return e;
 	};
 
 	var fireEvent = function(el, eventType){
@@ -123,6 +130,7 @@ Cold.add('event', function(){
 		add		: addEvent,
 		remove	: delEvent,
 		fire	: fireEvent,
+		fix		: fixEvent,
 		click	: click,
 		hover	: hover,
 		toggle	: toggle

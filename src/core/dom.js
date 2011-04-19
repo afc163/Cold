@@ -39,18 +39,18 @@ Cold.add('dom', ['browser'], function(){
 	};
 
 	var $CN = function(str, node, tag){
-		if(document.getElementsByClassName){
-			return document.getElementsByClassName(str);
+		node = node || document;
+		if(node.getElementsByClassName){
+			return node.getElementsByClassName(str);
 		}
-		else{   
-			node = node || document;
+		else{
 			tag = tag || '*';
 			var returnElements = [];
 			var els = (tag === '*' && node.all)? node.all : node.getElementsByTagName(tag);
-			var i = els.length;
+			var i = -1, l = els.length;
 			str = str.replace(/\-/g, '\\-');
 			var pattern = new RegExp('(^|\\s)' + str + '(\\s|$)');
-			while(--i >= 0){
+			while(++i < l){
 				if(pattern.test(els[i].className)){
 					returnElements.push(els[i]);
 				}
@@ -171,6 +171,10 @@ Cold.add('dom', ['browser'], function(){
 			style = style || {};
 			var styleText = '';
 			for(var s in style){
+				if(!style[s] && s.toLowerCase() !== 'opacity'){
+					el.style[_camelize(s)] = '';
+					continue;
+				}
 				s.toLowerCase() === 'opacity'
 					? opacity(el, style[s])
 					: ( styleText += _uncamelize(s) + ':' + style[s] + ';');
