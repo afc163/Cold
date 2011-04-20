@@ -8,7 +8,7 @@ Cold.add('app.dragable', ['dom', 'event'], function(){
 	dom.css(dashedBox, 'border', '2px dashed #C5E9E2');
 
 	//模块引用
-	var list = dom.$CN(DRAG_CN);
+	var list = dom.$CN(DRAG_CN), modArea = list[0].parentNode.parentNode;
 
 	//定义列对象
 	var column = function(columnNode, className){
@@ -57,12 +57,12 @@ Cold.add('app.dragable', ['dom', 'event'], function(){
 			//位置移动
 			item.style.left = e.clientX - x + 'px';
 			item.style.top = e.clientY - y + 'px';
-
 			//当前信息保存
 			var curr = {
 				min : Number.MAX_VALUE,	//当前拖动模块距离各模块的最小距离
 				target : dashedBox,		//当前拖动模块距离最近的模块
 				index : -1,
+				dashedMoved : false,
 				pos : {					//当前拖动模块的位置
 					'x' : e.clientX - x,
 					'y' : e.clientY - y
@@ -74,30 +74,37 @@ Cold.add('app.dragable', ['dom', 'event'], function(){
 				currColumn = (cdis2 > cdis1) ? column1 : column2;
 			//判断移动模块在列的哪一个区域
 			var i = currColumn.whichArea(curr.pos);
-			//Cold.log(currColumn.items);
-			//Cold.log(i);
 			//如果在第一个区域，或是最后一个区域，直接将虚线框加到列节点的前部
 			if(i === currColumn.items.length){
 				dom.appendEnd(currColumn.node, dashedBox);
+				curr.dashedMoved = true;
 			}
 			//其他情况则加到列的第i个模块的前面
 			else{
 				if(i-1 >= 0 && currColumn.items[i-1] === dashedBox){
 					dom.insertAfter(currColumn.items[i], dashedBox);
+					curr.dashedMoved = true;
 				}
 				else if(currColumn.items[i] !== dashedBox){
 					dom.insertBefore(currColumn.items[i], dashedBox);
+					curr.dashedMoved = true;
 				}
 			}
 			//重新绑定两列并计算模块位置
-			column1.init();
-			column2.init();
+			if(curr.dashedMoved){
+				column1.init();
+				column2.init();
+			}
 		};
 
 		//注册鼠标点击事件
 		event.add(controler, 'mousedown', function(e){
 			e = event.fix(e);
 			if(e.target !== controler) return;
+
+			//创建全屏占位div
+			createMaskDiv();
+
 			selectionEnable(item, false);
 			var pos = dom.getXY(item);
 			x = e.clientX - pos['x'];
@@ -134,6 +141,8 @@ Cold.add('app.dragable', ['dom', 'event'], function(){
 				dom.css(dashedBox, 'display', 'none');
 				dashedBox.className = '';
 				selectionEnable(item, true);
+				//删除全屏占位div
+				removeMaskDiv();
 			};
 		});
 	});
@@ -149,4 +158,27 @@ Cold.add('app.dragable', ['dom', 'event'], function(){
 			target.onmousedown = ( enable ? null : fn );
 		}
 	};
+	//用于占位，防止页面高度变化导致的鼠标错位
+	function createMaskDiv(){
+		var maskdiv = dom.id('maskdiv');
+		if(!maskdiv){
+			maskdiv = dom.create('div', {
+				'id'		: 'maskdiv'
+			});
+			dom.css(maskdiv, {
+				'width'		: '100%',
+				'position'	: 'absolute',
+				'top'		: '0',
+				'left'		: '0'
+			});
+		}
+		dom.css(maskdiv, {
+			'height': Cold.browser.pageSize()['height'] + 'px'
+		});
+		dom.appendEnd(document.body, maskdiv);
+	}
+
+	function removeMaskDiv(){
+		dom.remove(dom.id('maskdiv'));
+	}
 });

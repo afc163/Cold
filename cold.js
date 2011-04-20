@@ -16,7 +16,7 @@
 	};
 
 	var _getUrl = function(ns){
-		var url = ns, debug = Cold.DEBUG ? '/src' : '/bulid';
+		var url = ns, debug = Cold.DEBUG ? '/src' : '/build';
 		if(!(/app|component|util|task|other/g.test(ns))){
 			url = ns.replace(/cold/i,'cold.core');
 		}

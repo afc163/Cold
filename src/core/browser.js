@@ -70,6 +70,10 @@ Cold.add('browser', function(){
 
 	browser.pageSize = function(doc){
 		doc = doc || document;
+		return {
+			'width' : Math.max(doc.documentElement.scrollWidth, doc.body.scrollWidth),
+			'height' : Math.max(doc.documentElement.scrollHeight, doc.body.scrollHeight)
+		};
 	};
 
 	browser.scroll = function(doc){
