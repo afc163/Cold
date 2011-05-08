@@ -63,7 +63,8 @@ Cold.add('app.focus', ['dom', 'anim', 'event'], function(){
 			if(!this.config.outsideCss){
 				dom.css(this.win, {
 					'position'	: 'relative',
-					'overflow'	: 'hidden'
+					'overflow'	: 'hidden',
+					'font-size' : '0'
 				});
 				dom.css(this.desc, {
 					'position'		: 'absolute',

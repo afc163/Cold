@@ -174,7 +174,6 @@ Cold.add('anim', ['dom'], function(){
 	};
 
 	_effect.prototype = (function(){
-		var queue = {};
 		return {
 			init : function(el, props, option){
 				this.el = _id(el);
@@ -294,9 +293,9 @@ Cold.add('anim', ['dom'], function(){
 							that.onComplete = function(){
 								old && old();
 								if(firstRun || inQueue){
-									//Cold.log(queue[that.el].length);
-									next = queue[that.el].shift();
-									next ? next() : delete queue[that.el];
+									//Cold.log(that.el['queue'].length);
+									next = that.el.queue.shift();
+									next ? next() : ( that.el.queue = null );
 								}
 							};
 							//css3动画效果
@@ -329,14 +328,15 @@ Cold.add('anim', ['dom'], function(){
 							}
 						};
 				})(this);
-
-				if(!(this.el in queue)){
+				
+				if(this.el.queue == null){
 					firstRun = true;
-					queue[this.el] = [];
+					this.el.queue = [];
+					//Cold.log('!!!');
 					f();
 					return;
 				}
-				inQueue ? queue[this.el].push(f) : f();
+				inQueue ? this.el.queue.push(f) : f();
 			},
 			stop: function(){
 				if(this.transitionName){

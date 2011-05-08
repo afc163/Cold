@@ -169,7 +169,9 @@ Cold.add('app.dragable', ['dom', 'event'], function(){
 				'width'		: '100%',
 				'position'	: 'absolute',
 				'top'		: '0',
-				'left'		: '0'
+				'left'		: '0',
+				'background': 'url(http://www.google.com/c.gif)',
+				'z-index'	: '9999'
 			});
 		}
 		dom.css(maskdiv, {
