@@ -272,6 +272,17 @@ Cold.add('anim', ['dom'], function(){
 			resume : function(){
 				this.paused = false;
 			},
+			//无法使用在queue模式下
+			repeat : function(){
+				var oldComplete = this.onComplete;
+				this.onComplete = (function(that){
+					return function(){
+						oldComplete && oldComplete();
+						that.reset();
+						that.start(false);
+					};
+				})(this);
+			},
 			reset : function(){
 				this.update(0);
 				this.stop();
@@ -293,9 +304,10 @@ Cold.add('anim', ['dom'], function(){
 							that.onComplete = function(){
 								old && old();
 								if(firstRun || inQueue){
-									//Cold.log(that.el['queue'].length);
-									next = that.el.queue.shift();
-									next ? next() : ( that.el.queue = null );
+									if(that.el.queue !== null){
+										next = that.el.queue.shift();
+										next ? next() : ( that.el.queue = null );
+									}
 								}
 							};
 							//css3动画效果
@@ -334,9 +346,10 @@ Cold.add('anim', ['dom'], function(){
 					this.el.queue = [];
 					//Cold.log('!!!');
 					f();
-					return;
+					return this;
 				}
 				inQueue ? this.el.queue.push(f) : f();
+				return this;
 			},
 			stop: function(){
 				if(this.transitionName){
@@ -365,8 +378,7 @@ Cold.add('anim', ['dom'], function(){
 				option = callback;
 			}
 			var anim = new _effect(el, props, option);
-			anim.start(inQueue);
-			return this;
+			return anim.start(inQueue);
 		};
 	};
 
@@ -396,7 +408,7 @@ Cold.add('anim', ['dom'], function(){
 			'onComplete' : callback,
 			'easing' : easing
 		});
-		anim.start();
+		return anim.start();
 	};
 
 	var fadeIn = function(el, callback, duration, easing){
@@ -405,7 +417,7 @@ Cold.add('anim', ['dom'], function(){
 			'onComplete' : callback,
 			'easing' : easing
 		});
-		anim.start();
+		return anim.start();
 	};
 
 	var fadeOut = function(el, callback, duration, easing){
@@ -414,7 +426,7 @@ Cold.add('anim', ['dom'], function(){
 			'onComplete' : callback,
 			'easing' : easing
 		});
-		anim.start();
+		return anim.start();
 	};
 
 	var slide = function(el, to, callback, duration, easing){
@@ -423,7 +435,7 @@ Cold.add('anim', ['dom'], function(){
 			'onComplete' : callback,
 			'easing' : easing
 		});
-		anim.start();
+		return anim.start();
 	};
 
 	var scrollTo = function(top, callback, duration, easing){
@@ -437,7 +449,7 @@ Cold.add('anim', ['dom'], function(){
 			'onComplete' : Cold.isFunction(callback) ? callback : $void,
 			'easing' : easing
 		});
-		anim.start();
+		return anim.start();
 	};
 
 	return {
