@@ -212,7 +212,8 @@ Cold.add('anim', ['dom'], function(){
 				this.end = this.begin + this.duration;
 				for(var p in this.props){
 					var prop = this.props[p],
-						temp = Cold.isString(prop) ? prop.match(/^(\d*)(\.\d*)?(.*)$/) : prop;
+						temp = Cold.isString(prop) ? prop.match(/^(-?\d*)(\.\d*)?(.*)$/) : prop;
+					Cold.log(temp);
 					if(_color.isColorStyle(p)){
 						var c = _color.init(this.el, p, prop);
 						this.from[p] = c[0];
@@ -226,7 +227,7 @@ Cold.add('anim', ['dom'], function(){
 					else{
 						throw 'anim init: Invalid arguments.';
 					}
-					//Cold.log(p+"| from: "+this.from[p] + " to: " + this.to[p]);
+					Cold.log(p+"| from: "+this.from[p] + " to: " + this.to[p]);
 				}
 			},
 			step : function(){

@@ -45,10 +45,10 @@ Cold.add('browser', function(){
 		safari	: /safari/.test(_ua) && !this.chrome,
 		opera	: /opera/.test(_ua)
 	};
-	browser.ie = browser.msie;
-	browser.ie6 = browser.msie && parseInt(browser.version) === 6;
-	browser.ie7 = browser.msie && parseInt(browser.version) === 7;
-	browser.ie8 = browser.msie && parseInt(browser.version) === 8;
+	browser.IE = browser.ie = browser.msie;
+	browser.IE6 = browser.msie && parseInt(browser.version) === 6;
+	browser.IE7 = browser.msie && parseInt(browser.version) === 7;
+	browser.IE8 = browser.msie && parseInt(browser.version) === 8;
 
 	browser.winSize = function(doc){
 		var w, h;

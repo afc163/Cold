@@ -45,10 +45,10 @@ Cold.add('base', function(){
 			safari	: /safari/.test(_ua) && !this.chrome,
 			opera	: /opera/.test(_ua)
 		};
-		browser.ie = browser.msie;
-		browser.ie6 = browser.msie && parseInt(browser.version) === 6;
-		browser.ie7 = browser.msie && parseInt(browser.version) === 7;
-		browser.ie8 = browser.msie && parseInt(browser.version) === 8;
+		browser.IE = browser.ie = browser.msie;
+		browser.IE6 = browser.ie6 = browser.msie && parseInt(browser.version) === 6;
+		browser.IE7 = browser.ie7 = browser.msie && parseInt(browser.version) === 7;
+		browser.IE8 = browser.ie8 = browser.msie && parseInt(browser.version) === 8;
 
 		browser.winSize = function(doc){
 			var w, h;
@@ -104,16 +104,16 @@ Cold.add('base', function(){
 
 		var create = function(str, property){
 			var re_html = /^[\s]*<([a-zA-Z]*)[\s]*([^>]*)>(.*)<\/\1>[\s]*/i,
-				temp, elem;
+				temp, el;
 			if(str.match(re_html)){
 				temp = document.createElement('div');
 				temp.innerHTML = str;
-				elem = temp.firstChild;
+				el = temp.firstChild;
 				if (temp.childNodes.length === 1) {
-					return elem;
+					return el;
 				} else {
 					var frag = document.createDocumentFragment();
-					while (elem = temp.firstChild) frag.appendChild(elem);
+					while (el = temp.firstChild) frag.appendChild(el);
 					return frag;
 				}
 			}
@@ -205,7 +205,6 @@ Cold.add('base', function(){
 					el.style.filter = (opacity === '') ? '' : 'alpha(opacity=' + opacity*100 + ')';
 					el.style.zoom = 1;
 					if(opacity === 1){
-						el.style.zoom = '';
 						el.style.filter = '';
 					}
 				}
@@ -478,6 +477,7 @@ Cold.add('base', function(){
 		};
 		
 	});
+
 	Cold.add("ajax", function(){
 		var _jsonToQuery = function(data){
 			if(Cold.isString(data)){
@@ -749,6 +749,7 @@ Cold.add('base', function(){
 	Cold.add('anim', function(){
 
 		Cold.log("anim 载入完毕。");
+
 		var _id = Cold.dom.$E,
 			_css = Cold.dom.css,
 			_create = Cold.dom.create,
@@ -920,7 +921,6 @@ Cold.add('base', function(){
 		};
 
 		_effect.prototype = (function(){
-			var queue = {};
 			return {
 				init : function(el, props, option){
 					this.el = _id(el);
@@ -959,7 +959,7 @@ Cold.add('base', function(){
 					this.end = this.begin + this.duration;
 					for(var p in this.props){
 						var prop = this.props[p],
-							temp = Cold.isString(prop) ? prop.match(/^(\d*)(\.\d*)?(.*)$/) : prop;
+							temp = Cold.isString(prop) ? prop.match(/^(-?\d*)(\.\d*)?(.*)$/) : prop;
 						if(_color.isColorStyle(p)){
 							var c = _color.init(this.el, p, prop);
 							this.from[p] = c[0];
@@ -1019,6 +1019,17 @@ Cold.add('base', function(){
 				resume : function(){
 					this.paused = false;
 				},
+				//无法使用在queue模式下
+				repeat : function(){
+					var oldComplete = this.onComplete;
+					this.onComplete = (function(that){
+						return function(){
+							oldComplete && oldComplete();
+							that.reset();
+							that.start(false);
+						};
+					})(this);
+				},
 				reset : function(){
 					this.update(0);
 					this.stop();
@@ -1040,9 +1051,10 @@ Cold.add('base', function(){
 								that.onComplete = function(){
 									old && old();
 									if(firstRun || inQueue){
-										//Cold.log(queue[that.el].length);
-										next = queue[that.el].shift();
-										next ? next() : delete queue[that.el];
+										if(that.el.queue !== null){
+											next = that.el.queue.shift();
+											next ? next() : ( that.el.queue = null );
+										}
 									}
 								};
 								//css3动画效果
@@ -1075,14 +1087,16 @@ Cold.add('base', function(){
 								}
 							};
 					})(this);
-
-					if(!(this.el in queue)){
+					
+					if(this.el.queue == null){
 						firstRun = true;
-						queue[this.el] = [];
+						this.el.queue = [];
+						//Cold.log('!!!');
 						f();
-						return;
+						return this;
 					}
-					inQueue ? queue[this.el].push(f) : f();
+					inQueue ? this.el.queue.push(f) : f();
+					return this;
 				},
 				stop: function(){
 					if(this.transitionName){
@@ -1111,8 +1125,7 @@ Cold.add('base', function(){
 					option = callback;
 				}
 				var anim = new _effect(el, props, option);
-				anim.start(inQueue);
-				return this;
+				return anim.start(inQueue);
 			};
 		};
 
@@ -1142,7 +1155,7 @@ Cold.add('base', function(){
 				'onComplete' : callback,
 				'easing' : easing
 			});
-			anim.start();
+			return anim.start();
 		};
 
 		var fadeIn = function(el, callback, duration, easing){
@@ -1151,7 +1164,7 @@ Cold.add('base', function(){
 				'onComplete' : callback,
 				'easing' : easing
 			});
-			anim.start();
+			return anim.start();
 		};
 
 		var fadeOut = function(el, callback, duration, easing){
@@ -1160,7 +1173,7 @@ Cold.add('base', function(){
 				'onComplete' : callback,
 				'easing' : easing
 			});
-			anim.start();
+			return anim.start();
 		};
 
 		var slide = function(el, to, callback, duration, easing){
@@ -1169,7 +1182,7 @@ Cold.add('base', function(){
 				'onComplete' : callback,
 				'easing' : easing
 			});
-			anim.start();
+			return anim.start();
 		};
 
 		var scrollTo = function(top, callback, duration, easing){
@@ -1183,7 +1196,7 @@ Cold.add('base', function(){
 				'onComplete' : Cold.isFunction(callback) ? callback : $void,
 				'easing' : easing
 			});
-			anim.start();
+			return anim.start();
 		};
 
 		return {

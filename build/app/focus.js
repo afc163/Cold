@@ -6,7 +6,8 @@ Cold.add('app.focus', ['dom', 'anim', 'event'], function(){
 		duration	: 300,			//图片切换速度（毫秒）
 		easing		: 'easeOut',	//切换easing
 		direction	: "updown",		//图片切换方向，切换效果为roll时有效，可选[updown|leftright]
-		showDesc	: true,			//是否显示图片描述
+		hasDesc		: true,			//是否显示图片描述
+		hasIndex	: true,			//是否显示图片切换按钮
 		action		: 'hover',		//切换图片的动作，可选[hover|click]
 		auto		: true,			//是否自动切换
 		time		: 5000,			//定时切换图片的间隔，小于100毫秒则不自动切换
@@ -18,11 +19,15 @@ Cold.add('app.focus', ['dom', 'anim', 'event'], function(){
 		change : function(){
 			this.curr %= this.length;
 			//描述切换
-			var currPic = this.imgList[this.curr];
-			this.desc.innerHTML = currPic.getAttribute("title") ||currPic.getAttribute("alt");
+			if(this.desc){
+				var currPic = this.imgList[this.curr];
+				this.desc.innerHTML = currPic.getAttribute("title") ||currPic.getAttribute("alt");
+			}
 			//索引切换
-			this.indexList[this.curr].className = 'selected';
-			this.indexList[this.last].className = '';
+			if(this.indexList){
+				this.indexList[this.curr].className = 'selected';
+				this.indexList[this.last].className = '';
+			}
 			//图片切换
 			this[this.config.style]();
 		},
@@ -66,7 +71,7 @@ Cold.add('app.focus', ['dom', 'anim', 'event'], function(){
 					'overflow'	: 'hidden',
 					'font-size' : '0'
 				});
-				dom.css(this.desc, {
+				this.desc && dom.css(this.desc, {
 					'position'		: 'absolute',
 					'bottom'		: '0',
 					'line-height'	: '30px',
@@ -74,7 +79,7 @@ Cold.add('app.focus', ['dom', 'anim', 'event'], function(){
 					'z-index'		: '100',
 					'padding-left'	: '10px'
 				});
-				dom.css(this.descBg, {
+				this.descBg && dom.css(this.descBg, {
 					'background': '#000',
 					'position'	: 'absolute',
 					'bottom'	: '0',
@@ -82,7 +87,7 @@ Cold.add('app.focus', ['dom', 'anim', 'event'], function(){
 					'z-index'	: '100',
 					'width'		: '100%'
 				});
-				dom.css(this.picIndex, {
+				this.picIndex && om.css(this.picIndex, {
 					'position'	: 'absolute',
 					'z-index'	: '101',
 					'right'		: '1em',
@@ -91,7 +96,7 @@ Cold.add('app.focus', ['dom', 'anim', 'event'], function(){
 					'color'		: '#666',
 					'text-align': 'center'
 				});
-				dom.css(this.indexList, {
+				this.indexList && dom.css(this.indexList, {
 					'width'			: '16px',
 					'height'		: '16px',
 					'float'			: 'left',
@@ -123,7 +128,7 @@ Cold.add('app.focus', ['dom', 'anim', 'event'], function(){
 		},
 		//显示图片描述
 		showDesc : function(){
-			if(this.showDesc){
+			if(this.hasDesc){
 				if(!this.desc){
 					this.desc = dom.$C('ul');
 					this.desc.className = 'focus_desc';
@@ -143,6 +148,7 @@ Cold.add('app.focus', ['dom', 'anim', 'event'], function(){
 		},
 		//显示图片切换索引
 		showIndex : function(){
+			if(!this.hasIndex) return;
 			this.picIndex = dom.$C('ul');
 			this.picIndex.className = 'focus_picIndex';
 			for(var i=0; i<this.length; i++){

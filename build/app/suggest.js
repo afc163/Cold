@@ -125,7 +125,8 @@ Cold.add('app.suggest', ['dom', 'event', 'ajax', 'anim'], function(){
 			});
 		},
 		keyBind : function(){
-			event.add(_suggest.input, 'keyup', function(e){
+			var INPUT_EVENT = Cold.browser.IE ? 'keyup' : 'input';
+			event.add(_suggest.input, INPUT_EVENT, function(e){
 				if(e.keyCode === 38){
 					_suggest.lastItem();
 					_suggest.input.value = _suggest.list[_suggest.index].innerHTML;

@@ -16,16 +16,16 @@ Cold.add('dom', ['browser'], function(){
 
 	var create = function(str, property){
 		var re_html = /^[\s]*<([a-zA-Z]*)[\s]*([^>]*)>(.*)<\/\1>[\s]*/i,
-			temp, elem;
+			temp, el;
 		if(str.match(re_html)){
 			temp = document.createElement('div');
 			temp.innerHTML = str;
-			elem = temp.firstChild;
+			el = temp.firstChild;
 			if (temp.childNodes.length === 1) {
-				return elem;
+				return el;
 			} else {
 				var frag = document.createDocumentFragment();
-				while (elem = temp.firstChild) frag.appendChild(elem);
+				while (el = temp.firstChild) frag.appendChild(el);
 				return frag;
 			}
 		}

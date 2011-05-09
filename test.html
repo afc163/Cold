@@ -55,13 +55,13 @@ color: #fff !important;
 font-weight:bold !important;
 border: 1px solid #FD8F07 !important;
 }
+/* app.focus style end */
 #test11input{
 width:300px;
 height:28px;
 font-size:14px;
 line-height:28px;
 }
-/* app.focus style end */
 </style>
 <script type="text/javascript" src="http://www.ilovespringna.com/cold/cold.js"></script>
 </head>
@@ -117,7 +117,7 @@ line-height:28px;
 		<input type="text" id="test11input" />
 	</div>
 	<div class="num">--12--</div>
-	<div class="test" id="test12">测试数据</div>
+	<div class="test" id="test12" style='position:relative;'>点击开始动画</div>
 </div>
 <script type="text/javascript">
 //Cold.load('app.calendar');
@@ -133,7 +133,7 @@ Cold.load('app.suggest');
 
 Cold.ready(function(){
 	var T = {};
-	for(var i=1; i<=8; i++){
+	for(var i=1; i<=12; i++){
 		T['test'+i] = Cold.dom.$E('test'+i);
 	}
 
@@ -289,7 +289,13 @@ Cold.ready(function(){
 
 	//--11--
 	Cold.app.suggest('test11input', 'http://www.ilovespringna.com/cold/getSuggest.php?wd=');
-	
+
+	//--12--
+	Cold.event.click(T['test12'], function(){
+		Cold.anim.run(T['test12'], { 'top' : '-30px' }, function(){
+			T['test12'].innerHTML = '动画完成【上移三十像素】';
+		}, 1000, 'easeIn');
+	});
 });
 </script>
 <script src="http://s96.cnzz.com/stat.php?id=1991856&web_id=1991856" language="JavaScript"></script>
