@@ -172,7 +172,6 @@ Cold.add('anim', ['dom'], function(){
 		'easing'		: 'linear',
 		'css3support'	: true
 	};
-
 	_effect.prototype = (function(){
 		return {
 			init : function(el, props, option){
@@ -183,10 +182,9 @@ Cold.add('anim', ['dom'], function(){
 				this.unit = {};
 				
 				option = option || {};
-				Cold.extend(_effect.DefaultOption, option, true);
-				Cold.extend(this, _effect.DefaultOption, true);
+				option = Cold.extend(option, _effect.DefaultOption);
+				Cold.extend(this, option, true);
 				//this.current = 0;
-
 				if(this.css3support){
 					if(/linear|easeIn|easeOut|easeInOut|cubic-bezier\(.*\)/.test(this.easing)){
 						this.transitionName = _getTransitionName();

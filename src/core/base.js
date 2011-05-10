@@ -930,8 +930,8 @@ Cold.add('base', function(){
 					this.unit = {};
 					
 					option = option || {};
-					Cold.extend(_effect.DefaultOption, option, true);
-					Cold.extend(this, _effect.DefaultOption, true);
+					option = Cold.extend(option, _effect.DefaultOption);
+					Cold.extend(this, option, true);
 					//this.current = 0;
 
 					if(this.css3support){
