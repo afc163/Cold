@@ -325,6 +325,10 @@ Cold.add('dom', ['browser'], function(){
 		return insert(el, html, 'afterend');
 	};
 
+	var appendBody = function(html){
+		return appendEnd(document.body, html);
+	};
+
 	var remove = function(el){
 		if(el){
 			return el.parentNode.removeChild(el);
@@ -382,6 +386,7 @@ Cold.add('dom', ['browser'], function(){
 		insertAfter	: insertAfter,
 		appendFront	: appendFront,
 		appendEnd	: appendEnd,
+		appendBody	: appendBody,
 		remove		: remove,
 		width		: width,
 		height		: height,

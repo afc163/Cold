@@ -1,8 +1,7 @@
 //base.js 包括ajax、browser、event、dom、anim
-
 Cold.add('base', function(){
 	Cold.add('browser', function(){
-		Cold.log("browser 载入完毕。"); 
+		//Cold.log("browser 载入完毕。"); 
 		var _ua = navigator.userAgent.toLowerCase();
 		var browser = {
 			platform: navigator.platform,
@@ -88,7 +87,7 @@ Cold.add('base', function(){
 
 	Cold.add('dom', function(){
 
-		Cold.log("dom 载入完毕。");
+		//Cold.log("dom 载入完毕。");
 
 		var _domCache = Cold['cache']['elems'] = {};
 
@@ -413,6 +412,10 @@ Cold.add('base', function(){
 			return insert(el, html, 'afterend');
 		};
 
+		var appendBody = function(html){
+			return appendEnd(document.body, html);
+		};
+
 		var remove = function(el){
 			if(el){
 				return el.parentNode.removeChild(el);
@@ -470,6 +473,7 @@ Cold.add('base', function(){
 			insertAfter	: insertAfter,
 			appendFront	: appendFront,
 			appendEnd	: appendEnd,
+			appendBody	: appendBody,
 			remove		: remove,
 			width		: width,
 			height		: height,
@@ -612,7 +616,7 @@ Cold.add('base', function(){
 
 	Cold.add('event', function(){
 		//var _eventsList = {};
-		Cold.log("event 载入完毕。");
+		//Cold.log("event 载入完毕。");
 		var id = function(el){
 			return el = Cold.isString(el) ? document.getElementById(el) : el;
 		};
@@ -658,6 +662,9 @@ Cold.add('base', function(){
 				e.target = e.srcElement;
 				e.pageX = e.x;
 				e.pageY = e.y;
+				e.stopPropagation = function(){
+					e.cancelBubble = true;
+				};
 			}
 			return e;
 		};
@@ -748,7 +755,7 @@ Cold.add('base', function(){
 	//anim.js
 	Cold.add('anim', function(){
 
-		Cold.log("anim 载入完毕。");
+		//Cold.log("anim 载入完毕。");
 
 		var _id = Cold.dom.$E,
 			_css = Cold.dom.css,
@@ -1059,7 +1066,7 @@ Cold.add('base', function(){
 								};
 								//css3动画效果
 								if(that.transitionName){
-									Cold.log('css3 anim.');
+									//Cold.log('css3 anim.');
 									var transition = 'all '+ that.duration + 'ms ' + _uncamelize(that.easing);
 									that.el.style[that.transitionName] = transition;
 									setTimeout(function(){
@@ -1076,7 +1083,7 @@ Cold.add('base', function(){
 								}
 								//正常动画
 								else{
-									Cold.log('tandition anim.');
+									//Cold.log('tandition anim.');
 									that.timer = setInterval(function(){
 										if(that.paused){
 											that.end += that.fps;

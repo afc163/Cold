@@ -50,6 +50,9 @@ Cold.add('event', function(){
 			e.target = e.srcElement;
 			e.pageX = e.x;
 			e.pageY = e.y;
+			e.stopPropagation = function(){
+				e.cancelBubble = true;
+			};
 		}
 		return e;
 	};
