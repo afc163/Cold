@@ -87,18 +87,19 @@ Cold.add('app.focus', ['dom', 'anim', 'event'], function(){
 					'z-index'	: '100',
 					'width'		: '100%'
 				});
-				this.picIndex && om.css(this.picIndex, {
-					'position'	: 'absolute',
-					'z-index'	: '101',
-					'right'		: '1em',
-					'bottom'	: '6px',
-					'font'		: '14px/16px Helvetica,arial,sans-serif',
-					'color'		: '#666',
-					'text-align': 'center'
+				this.picIndex && dom.css(this.picIndex, {
+					'position'		: 'absolute',
+					'z-index'		: '101',
+					'right'			: '1em',
+					'bottom'		: '6px',
+					'font'			: '14px/16px Helvetica,arial,sans-serif',
+					'color'			: '#666',
+					'text-align'	: 'center'
 				});
 				this.indexList && dom.css(this.indexList, {
 					'width'			: '16px',
 					'height'		: '16px',
+					'line-height'	: '16px',
 					'float'			: 'left',
 					'display'		: 'inline',
 					'margin-left'	: '8px',
@@ -121,16 +122,18 @@ Cold.add('app.focus', ['dom', 'anim', 'event'], function(){
 				else{
 					dom.css(this.picList, {
 						'position'	: 'absolute',
-						'margin-top': '0'
+						'margin-top': '0',
+						'left'		: '0',
+						'top'		: '0'
 					});
 				}
 			}
 		},
 		//显示图片描述
 		showDesc : function(){
-			if(this.hasDesc){
+			if(this.config.hasDesc){
 				if(!this.desc){
-					this.desc = dom.$C('ul');
+					this.desc = dom.$C('div');
 					this.desc.className = 'focus_desc';
 					dom.css(this.desc, {});
 					//从当前图片的title属性或alt属性中读取描述
@@ -148,7 +151,7 @@ Cold.add('app.focus', ['dom', 'anim', 'event'], function(){
 		},
 		//显示图片切换索引
 		showIndex : function(){
-			if(!this.hasIndex) return;
+			if(!this.config.hasIndex) return;
 			this.picIndex = dom.$C('ul');
 			this.picIndex.className = 'focus_picIndex';
 			for(var i=0; i<this.length; i++){

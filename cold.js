@@ -125,8 +125,8 @@
 					obj[p] = exobj[p];
 				}
 				else{
-					if(!obj[p])	obj[p] = exobj[p];
-					else		continue;
+					if(!obj[p] && obj[p] !== false) obj[p] = exobj[p];
+					else continue;
 				}
             }
 			return obj;

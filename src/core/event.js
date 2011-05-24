@@ -53,6 +53,7 @@ Cold.add('event', function(){
 			e.stopPropagation = function(){
 				e.cancelBubble = true;
 			};
+			e.keyCode = e.keyCode || e.which;
 		}
 		return e;
 	};

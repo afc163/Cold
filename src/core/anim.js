@@ -211,7 +211,7 @@ Cold.add('anim', ['dom'], function(){
 				for(var p in this.props){
 					var prop = this.props[p],
 						temp = Cold.isString(prop) ? prop.match(/^(-?\d*)(\.\d*)?(.*)$/) : prop;
-					Cold.log(temp);
+					//Cold.log(temp);
 					if(_color.isColorStyle(p)){
 						var c = _color.init(this.el, p, prop);
 						this.from[p] = c[0];
@@ -225,7 +225,7 @@ Cold.add('anim', ['dom'], function(){
 					else{
 						throw 'anim init: Invalid arguments.';
 					}
-					Cold.log(p+"| from: "+this.from[p] + " to: " + this.to[p]);
+					//Cold.log(p+"| from: "+this.from[p] + " to: " + this.to[p]);
 				}
 			},
 			step : function(){
@@ -438,15 +438,18 @@ Cold.add('anim', ['dom'], function(){
 	};
 
 	var scrollTo = function(top, callback, duration, easing){
-		var anchor = top.match(/\s*#(.*)\s*/);
-		if(anchor){
-			top = _getXY(_id(anchor[1]))['y'];
+		if(Cold.isString(top)){
+			top = _getXY(_id(top.match(/\s*#(.*)\s*/)[1]))['y'];
+		}
+		else{
+			top = _getXY(top)['y'];
 		}
 		var doc = document, docElem = doc.documentElement;
-		var anim = new _effect((docElem.scrollTop ? docElem : doc.body), { scrollTop : top },{
+		var anim = new _effect(('scrollTop' in docElem ? docElem : doc.body), { scrollTop : top },{
 			'duration' : Cold.isFunction(callback) ? duration : callback,
 			'onComplete' : Cold.isFunction(callback) ? callback : $void,
-			'easing' : easing
+			'easing' : easing,
+			'css3support' : false
 		});
 		return anim.start();
 	};

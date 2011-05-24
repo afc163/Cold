@@ -6,6 +6,7 @@ Cold.add('app.dragable', ['dom', 'event'], function(){
 	dashedBox.id = 'dashedBox';
 	dashedBox.className = DRAG_CN;
 	dom.css(dashedBox, 'border', '2px dashed #C5E9E2');
+	var moveBasePoint = dom.id('presentation');
 
 	//模块引用
 	var list = dom.$CN(DRAG_CN), modArea = list[0].parentNode.parentNode;
@@ -107,6 +108,11 @@ Cold.add('app.dragable', ['dom', 'event'], function(){
 
 			selectionEnable(item, false);
 			var pos = dom.getXY(item);
+			if(moveBasePoint){
+				var basePos = dom.getXY(moveBasePoint);
+				pos['x'] -= basePos['x'];
+				pos['y'] -= basePos['y'];
+			}
 			x = e.clientX - pos['x'];
 			y = e.clientY - pos['y'];
 			w = dom.width(item);

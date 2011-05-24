@@ -1,7 +1,8 @@
 //base.js 包括ajax、browser、event、dom、anim
+
 Cold.add('base', function(){
 	Cold.add('browser', function(){
-		//Cold.log("browser 载入完毕。"); 
+		Cold.log("browser 载入完毕。"); 
 		var _ua = navigator.userAgent.toLowerCase();
 		var browser = {
 			platform: navigator.platform,
@@ -87,7 +88,7 @@ Cold.add('base', function(){
 
 	Cold.add('dom', function(){
 
-		//Cold.log("dom 载入完毕。");
+		Cold.log("dom 载入完毕。");
 
 		var _domCache = Cold['cache']['elems'] = {};
 
@@ -615,12 +616,16 @@ Cold.add('base', function(){
 	});
 
 	Cold.add('event', function(){
+
 		//var _eventsList = {};
-		//Cold.log("event 载入完毕。");
+
+		//console.info("event 载入完毕。");
+
 		var id = function(el){
 			return el = Cold.isString(el) ? document.getElementById(el) : el;
 		};
-		var addEvent = function(el, eventType, func){
+
+		var addEvent = function(el, eventType, func, context){
 			el = id(el);
 			eventType = eventType || 'click';
 			if(!el || el.nodeType === 3 || el.nodeType === 8 || !Cold.isFunction(func)){
@@ -665,6 +670,7 @@ Cold.add('base', function(){
 				e.stopPropagation = function(){
 					e.cancelBubble = true;
 				};
+				e.keyCode = e.keyCode || e.which;
 			}
 			return e;
 		};
@@ -755,7 +761,7 @@ Cold.add('base', function(){
 	//anim.js
 	Cold.add('anim', function(){
 
-		//Cold.log("anim 载入完毕。");
+		Cold.log("anim 载入完毕。");
 
 		var _id = Cold.dom.$E,
 			_css = Cold.dom.css,
@@ -926,7 +932,6 @@ Cold.add('base', function(){
 			'easing'		: 'linear',
 			'css3support'	: true
 		};
-
 		_effect.prototype = (function(){
 			return {
 				init : function(el, props, option){
@@ -940,7 +945,6 @@ Cold.add('base', function(){
 					option = Cold.extend(option, _effect.DefaultOption);
 					Cold.extend(this, option, true);
 					//this.current = 0;
-
 					if(this.css3support){
 						if(/linear|easeIn|easeOut|easeInOut|cubic-bezier\(.*\)/.test(this.easing)){
 							this.transitionName = _getTransitionName();
@@ -967,6 +971,7 @@ Cold.add('base', function(){
 					for(var p in this.props){
 						var prop = this.props[p],
 							temp = Cold.isString(prop) ? prop.match(/^(-?\d*)(\.\d*)?(.*)$/) : prop;
+						//Cold.log(temp);
 						if(_color.isColorStyle(p)){
 							var c = _color.init(this.el, p, prop);
 							this.from[p] = c[0];
@@ -1066,7 +1071,7 @@ Cold.add('base', function(){
 								};
 								//css3动画效果
 								if(that.transitionName){
-									//Cold.log('css3 anim.');
+									Cold.log('css3 anim.');
 									var transition = 'all '+ that.duration + 'ms ' + _uncamelize(that.easing);
 									that.el.style[that.transitionName] = transition;
 									setTimeout(function(){
@@ -1083,7 +1088,7 @@ Cold.add('base', function(){
 								}
 								//正常动画
 								else{
-									//Cold.log('tandition anim.');
+									Cold.log('tandition anim.');
 									that.timer = setInterval(function(){
 										if(that.paused){
 											that.end += that.fps;
@@ -1193,15 +1198,18 @@ Cold.add('base', function(){
 		};
 
 		var scrollTo = function(top, callback, duration, easing){
-			var anchor = top.match(/\s*#(.*)\s*/);
-			if(anchor){
-				top = _getXY(_id(anchor[1]))['y'];
+			if(Cold.isString(top)){
+				top = _getXY(_id(top.match(/\s*#(.*)\s*/)[1]))['y'];
+			}
+			else{
+				top = _getXY(top)['y'];
 			}
 			var doc = document, docElem = doc.documentElement;
-			var anim = new _effect((docElem.scrollTop ? docElem : doc.body), { scrollTop : top },{
+			var anim = new _effect(('scrollTop' in docElem ? docElem : doc.body), { scrollTop : top },{
 				'duration' : Cold.isFunction(callback) ? duration : callback,
 				'onComplete' : Cold.isFunction(callback) ? callback : $void,
-				'easing' : easing
+				'easing' : easing,
+				'css3support' : false
 			});
 			return anim.start();
 		};
