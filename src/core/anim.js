@@ -186,7 +186,7 @@ Cold.add('anim', ['dom'], function(){
 				Cold.extend(this, option, true);
 				//this.current = 0;
 				if(this.css3support){
-					if(/linear|easeIn|easeOut|easeInOut|cubic-bezier\(.*\)/.test(this.easing)){
+					if(/^(linear|easeIn|easeOut|easeInOut|cubic-bezier\(.*\))$/.test(this.easing)){
 						this.transitionName = _getTransitionName();
 					}
 					//修复firefox对left,top等定位属性在css3 transition下,如果没有定义left等属性就没有动画效果的问题

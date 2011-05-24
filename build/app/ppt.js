@@ -9,7 +9,7 @@ Cold.add('app.ppt', ['dom','anim','event'], function(){
 			window.location.hash="#slide-"+num;
 			anim.run(ppt.slides, {
 				'margin-top' : -(num-1)*ppt.height + 'px'
-			}, function(){}, 500, 'easeOut');
+			}, function(){}, 600, 'easeOutStrong');
 			ppt.showInfo();
 		},
 		prev : function(){
