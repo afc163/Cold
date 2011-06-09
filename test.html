@@ -118,6 +118,8 @@ line-height:28px;
 	</div>
 	<div class="num">--12--</div>
 	<div class="test" id="test12" style='position:relative;'>点击开始动画</div>
+	<div class="num">--13--</div>
+	<div class="test" id="test13">点击进行测试</div>
 </div>
 <script type="text/javascript">
 //Cold.load('app.calendar');
@@ -133,7 +135,7 @@ Cold.load('app.suggest');
 
 Cold.ready(function(){
 	var T = {};
-	for(var i=1; i<=12; i++){
+	for(var i=1; i<=13; i++){
 		T['test'+i] = Cold.dom.$E('test'+i);
 	}
 
@@ -295,6 +297,11 @@ Cold.ready(function(){
 		Cold.anim.run(T['test12'], { 'top' : '-30px' }, function(){
 			T['test12'].innerHTML = '动画完成【上移三十像素】';
 		}, 1000, 'easeIn');
+	});
+
+	//--13--
+	Cold.event.add(T['test13'], 'click', function(e){
+		alert(e.target);
 	});
 });
 </script>

@@ -44,7 +44,6 @@ Cold.add('app.ppt', ['dom','anim','event'], function(){
 		},
 		keyBind : function(){
 			event.add(document, 'keyup', function(e){
-				e = event.fix(e);
 				switch(e.keyCode){
 					case 33:
 					case 37:

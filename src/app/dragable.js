@@ -70,8 +70,8 @@ Cold.add('app.dragable', ['dom', 'event'], function(){
 				}
 			};
 			//判断靠近哪一列，得到当前列
-			var cdis1 = Math.abs(curr.pos['x'] - column1.x);
-				cdis2 = Math.abs(curr.pos['x'] - column2.x);
+			var cdis1 = Math.abs(curr.pos['x'] - column1.x),
+				cdis2 = Math.abs(curr.pos['x'] - column2.x),
 				currColumn = (cdis2 > cdis1) ? column1 : column2;
 			//判断移动模块在列的哪一个区域
 			var i = currColumn.whichArea(curr.pos);
@@ -100,7 +100,6 @@ Cold.add('app.dragable', ['dom', 'event'], function(){
 
 		//注册鼠标点击事件
 		event.add(controler, 'mousedown', function(e){
-			e = event.fix(e);
 			if(e.target !== controler) return;
 
 			//创建全屏占位div

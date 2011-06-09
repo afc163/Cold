@@ -6,6 +6,7 @@ Cold.add('app.dragable', ['dom', 'event'], function(){
 	dashedBox.id = 'dashedBox';
 	dashedBox.className = DRAG_CN;
 	dom.css(dashedBox, 'border', '2px dashed #C5E9E2');
+	var moveBasePoint = dom.id('presentation');
 
 	//模块引用
 	var list = dom.$CN(DRAG_CN), modArea = list[0].parentNode.parentNode;
@@ -69,8 +70,8 @@ Cold.add('app.dragable', ['dom', 'event'], function(){
 				}
 			};
 			//判断靠近哪一列，得到当前列
-			var cdis1 = Math.abs(curr.pos['x'] - column1.x);
-				cdis2 = Math.abs(curr.pos['x'] - column2.x);
+			var cdis1 = Math.abs(curr.pos['x'] - column1.x),
+				cdis2 = Math.abs(curr.pos['x'] - column2.x),
 				currColumn = (cdis2 > cdis1) ? column1 : column2;
 			//判断移动模块在列的哪一个区域
 			var i = currColumn.whichArea(curr.pos);
@@ -99,7 +100,6 @@ Cold.add('app.dragable', ['dom', 'event'], function(){
 
 		//注册鼠标点击事件
 		event.add(controler, 'mousedown', function(e){
-			e = event.fix(e);
 			if(e.target !== controler) return;
 
 			//创建全屏占位div
@@ -107,6 +107,11 @@ Cold.add('app.dragable', ['dom', 'event'], function(){
 
 			selectionEnable(item, false);
 			var pos = dom.getXY(item);
+			if(moveBasePoint){
+				var basePos = dom.getXY(moveBasePoint);
+				pos['x'] -= basePos['x'];
+				pos['y'] -= basePos['y'];
+			}
 			x = e.clientX - pos['x'];
 			y = e.clientY - pos['y'];
 			w = dom.width(item);

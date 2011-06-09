@@ -21,7 +21,6 @@ Cold.add('app.DatePicker', ['dom','event'], function(){
 		dom.appendEnd(item.parentNode, pickFlag);
 		
 		var func = function(e){
-			e = event.fix(e);
 			e.stopPropagation();
 
 			if(!DatePicker){

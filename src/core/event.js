@@ -8,7 +8,7 @@ Cold.add('event', function(){
 		return el = Cold.isString(el) ? document.getElementById(el) : el;
 	};
 
-	var addEvent = function(el, eventType, func, context){
+	var addEvent = function(el, eventType, func){
 		el = id(el);
 		eventType = eventType || 'click';
 		if(!el || el.nodeType === 3 || el.nodeType === 8 || !Cold.isFunction(func)){
@@ -18,7 +18,9 @@ Cold.add('event', function(){
 			el.addEventListener(eventType, func, false);
 		}
 		else if(el.attachEvent){
-			el.attachEvent('on' + eventType, func);
+			el.attachEvent('on' + eventType, function(){
+				func.call(el, fixEvent(window.event));
+			});
 		}
 		else{
 			el['on' + eventType] = func;

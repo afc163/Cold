@@ -200,8 +200,8 @@ Cold.add('anim', ['dom'], function(){
 					//记录有多少css动画效果
 					if(this.transitionName){
 						this.el.css3AnimNum || this.el.css3AnimNum === 1
-										? this.el.css3AnimNum++
-										: ( this.el.css3AnimNum = 1 );
+							? this.el.css3AnimNum++
+							: ( this.el.css3AnimNum = 1 );
 					}
 				}
 			},
