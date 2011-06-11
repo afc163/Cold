@@ -16,19 +16,23 @@ border:none;
 body{
 padding-top:0!important;
 }
+img{
+margin-left:2em;
+}
 p{
 margin:1em 0;
 font-size:14px;
 }
 .num{
 padding: 0.5em 2em;
-margin: 2em 0 0 0;
+margin: 1em 0 0 0;
 color:red;
 }
 .test{
 border:1px dashed #ccc;
-margin: 0 2em 2em 2em;
+margin: 0 2em 1em;
 padding: 1em;
+_zoom:1;
 }
 .warning{
 color:red;
@@ -41,6 +45,9 @@ display:none !important;
 #win{
 width:433px;
 height:178px;
+}
+#focus li {
+float:left;
 }
 #focus li a{
 display:block;
@@ -301,7 +308,7 @@ Cold.ready(function(){
 
 	//--13--
 	Cold.event.add(T['test13'], 'click', function(e){
-		alert(e.target);
+		alert("e.target为"+e.target.id);
 	});
 });
 </script>

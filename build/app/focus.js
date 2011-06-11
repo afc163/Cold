@@ -1,10 +1,18 @@
 Cold.add('app.focus', ['dom', 'anim', 'event'], function(){
 
+	/* app.focus css
+	#win {width:433px;height:178px;}
+	#focus li {float:left;}
+	#focus li a {display:block;}
+	.focus_picIndex li:hover {color:#000;font-weight:bold;}
+	.focus_picIndex li.selected {background:#FD8F07 !important;color: #fff !important;font-weight:bold !important;border: 1px solid #FD8F07 !important;}
+	*/
+
 	var dom = Cold.dom;
 	var  _defaultConfig = {
 		style		: "fade",		//图片切换效果，可选[none|fade|roll]
 		duration	: 300,			//图片切换速度（毫秒）
-		easing		: 'easeOut',	//切换easing
+		easing		: 'linear',		//切换easing
 		direction	: "updown",		//图片切换方向，切换效果为roll时有效，可选[updown|leftright]
 		hasDesc		: true,			//是否显示图片描述
 		hasIndex	: true,			//是否显示图片切换按钮

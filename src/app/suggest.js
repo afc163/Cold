@@ -35,6 +35,7 @@ Cold.add('app.suggest', ['dom', 'event', 'ajax', 'anim'], function(){
 					'z-index'	: '10'
 				});
 				dom.css(parentDiv, 'position', 'relative');
+				dom.css(parentDiv, 'z-index', '9999');
 
 				Cold.each(data, function(item, index){
 					temp = dom.create('p');
