@@ -1,4 +1,4 @@
-Cold.add('dom', ['browser'], function(){
+Cold.add('dom', function(){
 
 	Cold.log("dom 载入完毕。");
 
@@ -113,7 +113,8 @@ Cold.add('dom', ['browser'], function(){
 				css(el, 'visibility', 'visible');
 			}
 			el.style.opacity = opacity;
-			if(Cold.browser.ie && Cold.browser.version <= 8){
+			//if ie browser
+			if(!-[1,]){
 				el.style.filter = (opacity === '') ? '' : 'alpha(opacity=' + opacity*100 + ')';
 				el.style.zoom = 1;
 				if(opacity === 1){
@@ -347,11 +348,17 @@ Cold.add('dom', ['browser'], function(){
 		return h < 0 ? 0 : h;
 	};
 
-	var getScroll = Cold.browser.scroll;
+	var _getScroll =  function(doc){
+		doc = doc || document;
+		return {
+			'left' : Math.max(doc.documentElement.scrollLeft, doc.body.scrollLeft),
+			'top' : Math.max(doc.documentElement.scrollTop, doc.body.scrollTop)
+		};
+	};
 
 	var getXY = function(el){
 		var x = 0, y = 0, doc = el.ownerDocument, docElem = doc.documentElement,
-			scrolls = getScroll(doc),
+			scrolls = _getScroll(doc),
 			clientTop = docElem.clientTop || doc.body.clientTop || 0,
 			clientLeft = docElem.clientLeft || doc.body.clientLeft || 0;
 		if(el.getBoundingClientRect){
