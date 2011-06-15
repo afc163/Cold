@@ -1,4 +1,4 @@
-Cold.add('app.DatePicker', ['dom','event'], function(){
+Cold.add('app.datepicker', ['dom','event'], function(){
 
 	/* app.DatePicker css
 	.dpr_box select{margin:6px 0;}
@@ -36,9 +36,9 @@ Cold.add('app.DatePicker', ['dom','event'], function(){
 			e.stopPropagation();
 
 			if(!DatePicker){
-				DatePickerInit(item);
+				DatePickerInit();
 			}
-			DatePicker.show();
+			DatePicker.show(item);
 			document.onclick = function(){
 				DatePicker.hide();
 				document.onclick = null;
@@ -52,9 +52,8 @@ Cold.add('app.DatePicker', ['dom','event'], function(){
 		event.click(pickFlag, func);
 	});
 
-	function DatePickerInit(input){
+	function DatePickerInit(){
 		DatePicker = {
-			input : input,
 			setDateTo : function(){
 				DatePicker.input.value = DatePicker.year + '-' +  (DatePicker.month+1) + '-' +  DatePicker.day;
 			},
@@ -74,34 +73,45 @@ Cold.add('app.DatePicker', ['dom','event'], function(){
 			createDiv : function(input){
 				var pos = dom.getXY(input),
 					w = dom.width(input),
-					h = dom.height(input);
-				var picker = dom.create('div');
-				picker.id = 'datepicker';
-				dom.css(picker, {
-					'width'			: '168px',
-					'overflow'		: 'hidden',
-					'font-size'		: '12px',
-					'color'			: '#555',
-					'background'	: '#fff',
-					'z-index'		: 500,
-					'border'		: '1px solid #999',
-					'position'		: 'absolute',
-					'left'			: pos.x + 'px',
-					'top'			: pos.y + h - 1 + 'px'
-				});
-				picker.innerHTML = '<div class="dpr_box">\
-						<div class="dpr_select">\
-							<select id="dpr_monthSelect"></select>\
-							<select id="dpr_yearSelect"></select>\
-						</div>\
-						<div id="dpr_weeks"></div>\
-						<ul id="dpr_days"></ul>\
-					</div>';
-				dom.appendBody(picker);
+					h = dom.height(input),
+					picker = dom.id('datepicker');
+				if(!picker){
+					picker = dom.create('div');
+					picker.id = 'datepicker';
+					dom.css(picker, {
+						'width'		: '168px',
+						'overflow'	: 'hidden',
+						'font-size'	: '12px',
+						'color'		: '#555',
+						'background': '#fff',
+						'z-index'	: 500,
+						'border'	: '1px solid #999',
+						'position'	: 'absolute',
+						'left'		: pos.x + 'px',
+						'top'		: pos.y + h - 1 + 'px'
+					});
+					picker.innerHTML = '<div class="dpr_box">\
+							<div class="dpr_select">\
+								<select id="dpr_monthSelect"></select>\
+								<select id="dpr_yearSelect"></select>\
+							</div>\
+							<div id="dpr_weeks"></div>\
+							<ul id="dpr_days"></ul>\
+						</div>';
+					dom.appendBody(picker);
+				}
+				else{
+					dom.id('dpr_monthSelect').options.length = 0;
+					dom.id('dpr_yearSelect').options.length = 0;
+					dom.css(picker, {
+						'left'		: pos.x + 'px',
+						'top'		: pos.y + h - 1 + 'px'
+					});
+					dom.css(picker, 'display', 'block');
+				}
 				DatePicker.DIV = picker;
 				//加入月份选项
 				Cold.each(DatePicker.months, function(item, index){
-					//tempHtml += '<option value="'+index+'">'+item+'</option>';
 					dom.id('dpr_monthSelect').options[dom.id('dpr_monthSelect').options.length] = new Option(item, index);
 				});
 				event.add(dom.id('dpr_monthSelect'), 'change', function(){
@@ -174,7 +184,7 @@ Cold.add('app.DatePicker', ['dom','event'], function(){
 				Cold.each(dom.$CN('dpr_daySelect'), function(item){
 					event.click(item, function(){
 						DatePicker.setDateFrom(item.getAttribute('dateValue'));
-						DatePicker.setDateTo(input);
+						DatePicker.setDateTo(DatePicker.input);
 						DatePicker.hide();
 					});
 					event.hover(item, {
@@ -188,14 +198,15 @@ Cold.add('app.DatePicker', ['dom','event'], function(){
 				});
 			},
 			show : function(input){
+				DatePicker.input = input;
+				var yearStart = DatePicker.input.getAttribute('yearStart');
+				var range = DatePicker.input.getAttribute('range');
+				DatePicker.yearStart = yearStart ? parseInt(yearStart, 10) : (new Date().getFullYear());
+				DatePicker.yearRange = range ? parseInt(range, 10) : 80;
 				DatePicker.setDateFrom(DatePicker.input.value);
-				if(!dom.id('datepicker')){
-					DatePicker.createDiv(DatePicker.input);
-				}
-				else{
-					dom.css(DatePicker.DIV, 'display', 'block');
-					DatePicker.update();
-				}
+
+				DatePicker.createDiv(DatePicker.input);
+				DatePicker.update();
 			},
 			hide : function(){
 				DatePicker.DIV && dom.css(DatePicker.DIV, 'display', 'none');
@@ -205,7 +216,5 @@ Cold.add('app.DatePicker', ['dom','event'], function(){
 		DatePicker.months = "一月 二月 三月 四月 五月 六月 七月 八月 九月 十月 十一月 十二月".split(' ');
 		DatePicker.daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 		DatePicker.startDay = 7; // 1 = week starts on Monday, 7 = week starts on Sunday
-		DatePicker.yearRange = 80;
-		DatePicker.yearStart = (new Date().getFullYear());
 	}
 });

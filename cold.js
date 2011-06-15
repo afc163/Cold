@@ -168,7 +168,7 @@
 							(!space[n]) && ( space[n] = {} );
 							space = space[n];
 						}
-					}
+					}		
 					node && node.callback && node.callback();
 					cs[ns] = 'attached';
 					f['done'] = true;
@@ -276,7 +276,7 @@
 					typeof callback === 'function' && callback();
 					cs[ns] = 'attached';
 					cs['loadingN'] -= 1;
-				}, true);
+				});
 			}
 			return Cold;
 		},
@@ -346,7 +346,7 @@ Cold.add('Cold', function(){
 		}
 		timer && clearTimeout(timer);
 		_execReady.call();
-		Cold.scripts.nodes = {};
+		//Cold.scripts.nodes = {};
 		Cold.reqList = {};
 	};
 
