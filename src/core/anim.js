@@ -444,8 +444,13 @@ Cold.add('anim', ['dom'], function(){
 		else{
 			top = _getXY(top)['y'];
 		}
-		var doc = document, docElem = doc.documentElement;
-		var anim = new _effect(('scrollTop' in docElem ? docElem : doc.body), { scrollTop : top },{
+		var handle = document.documentElement
+			_ua = navigator.userAgent.toLowerCase();;
+		//修复chrome对document.documentElement.scrollTop无法识别的bug
+		if(/chrome/.test(_ua)){
+			handle = document.body;
+		}
+		var anim = new _effect(handle, { scrollTop : top },{
 			'duration' : Cold.isFunction(callback) ? duration : callback,
 			'onComplete' : Cold.isFunction(callback) ? callback : $void,
 			'easing' : easing,
