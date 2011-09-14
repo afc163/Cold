@@ -1,6 +1,7 @@
 Cold.add('app.datepicker', ['dom','event'], function(){
 
 	/* app.DatePicker css
+	.dpr_box * {margin:0;padding:0;} 
 	.dpr_box select{margin:6px 0;}
 	.dpr_box li{font-size:12px;text-align: center;width: 14.2857%;float:left;display:inline;margin:0;padding:1px 0;list-style:none;_zoom:1;}
 	.dpr_select, #dpr_weeks{background:#DAF2E6;text-align:center;overflow:hidden;_zoom:1;font-weight:bold;}
@@ -19,7 +20,7 @@ Cold.add('app.datepicker', ['dom','event'], function(){
 	Cold.each(inputs, function(item){
 		dom.val(item, 'readonly', 'true');
 		var pickFlag = dom.create('span');
-		pickFlag.innerHTML = '日期';
+		pickFlag.innerHTML = '';
 		//这里的位置是权宜的，更通用的方法是根据input控件的xy位置和高宽来确定位置
 		dom.css(pickFlag, {
 			'float'		: 'left',
@@ -169,7 +170,12 @@ Cold.add('app.datepicker', ['dom','event'], function(){
 						}
 						//set the days
 						if ((firstDay <= DatePicker.daysInMonth[DatePicker.month]) && (firstDay > 0)){
-							tempHtml += '<li class="dpr_daySelect'+tempInfo+'" dateValue="'+DatePicker.year+'-'+(parseInt(DatePicker.month,10)+1)+'-'+firstDay+'">'+firstDay+'</li>';
+							if(DatePicker.weekdays.indexOf(i) !== -1){
+								tempHtml += '<li class="dpr_daySelect'+tempInfo+'" dateValue="'+DatePicker.year+'-'+(parseInt(DatePicker.month,10)+1)+'-'+firstDay+'">'+firstDay+'</li>';
+							}
+							else{
+								tempHtml += '<li class="dpr_empty" style="color:#eee">'+firstDay+'</li>';
+							}
 						} else {
 							tempHtml += '<li class="dpr_empty"> </li>';
 						}
@@ -201,6 +207,7 @@ Cold.add('app.datepicker', ['dom','event'], function(){
 				DatePicker.input = input;
 				var yearStart = DatePicker.input.getAttribute('yearStart');
 				var range = DatePicker.input.getAttribute('range');
+				DatePicker.weekdays = DatePicker.input.getAttribute('weekdays') || '1234567';
 				DatePicker.yearStart = yearStart ? parseInt(yearStart, 10) : (new Date().getFullYear());
 				DatePicker.yearRange = range ? parseInt(range, 10) : 80;
 				DatePicker.setDateFrom(DatePicker.input.value);
