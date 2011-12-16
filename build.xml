@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<!--
+Cold 构建文件
+-->
+<project name="Cold-project-build"
+         default="build" xmlns:ac="antlib:net.sf.antcontrib">
+    <description>Cold Projects Build File</description>
+
+    <!-- Cold 主目录 -->
+	<property name="Cold.dir" location="."/>
+    <!-- Cold 工具目录 -->
+    <property name="Cold.tools.dir" location="${Cold.dir}/tools/"/>
+    <!-- Cold build 目录 -->
+    <property name="Cold.build.dir" location="${Cold.dir}/build/"/>
+    <!-- Cold 源码目录 -->
+	<property name="Cold.src.dir" location="${Cold.dir}/src/"/>
+    <!-- Cold 源码编码 -->
+	<property name="charset" value="utf-8"/>
+
+	<!-- Cold 测试服务器地址 -->
+	<property name="Cold.ftp.src" value="64.158.146.24"/>
+
+	<!-- ftp服务器用户名 -->
+	<property name="Cold.ftp.username" value="pianyou"/>
+
+	<!-- git branch -->
+	<property name="git.origin" value="origin"/>
+
+	<!-- Generate directory -->  
+    <target name="init" depends="clean">  
+		<tstamp/>  
+		<echo message="================= start make directory =================" />
+		<mkdir dir="${Cold.build.dir}"/>  
+		<mkdir dir="${Cold.build.dir}/app"/>  
+		<mkdir dir="${Cold.build.dir}/core"/>  
+		<mkdir dir="${Cold.build.dir}/util"/>  
+		<mkdir dir="${Cold.build.dir}/task"/>  
+		<echo message="================= end make directory =================" />
+    </target>  
+
+    <!--
+	全部构建
+	-->
+	<target name="build" depends="init">
+		<property name="yui.compress" value="${Cold.dir}/tools/yuicompressor.jar" />
+
+		<echo message="================= compressing cold.js =================" />
+
+		<apply executable="java" parallel="false" failonerror="true" verbose="true">  
+			<fileset dir="${Cold.dir}" includes="cold.js" />  
+			<arg line="-jar" />  
+			<arg path="${yui.compress}" />  
+			<arg line="--charset ${charset}" />  
+			<srcfile />  
+			<arg line="-o" /> 
+			<mapper type="glob" from="cold.js" to="cold-min.js" />  
+			<targetfile />  
+		</apply> 
+
+		<echo message="================= modifying DEBUG value =================" />
+
+            <exec executable="bash" newenvironment="false" dir=".">
+				<arg value="./tools/modify-min-js.sh"/>
+            </exec>
+				
+		<echo message="================= compressing src folder =================" />
+
+		<apply executable="java" parallel="false" failonerror="true" verbose="true">  
+			<fileset dir="${Cold.src.dir}" includes="**/*.js" />  
+			<arg line="-jar" />  
+			<arg path="${yui.compress}" />  
+			<arg line="--charset ${charset}" />  
+			<srcfile />  
+			<arg line="-o" /> 
+			<mapper type="glob" from="*.js" to="${Cold.build.dir}/*.js" />  
+			<targetfile />  
+		</apply>  
+
+		<echo message="================= build successfully =================" />
+
+	</target>
+
+	<!--
+	部署到测试服务器
+	-->
+	<target name="deploy" depends="build">
+		<echo message="================= start deploy =================" />
+		<ftp server= "${Cold.ftp.src}"
+			 remotedir= "/domains/pianyou.me/public_html/cold/"
+			 userid= "${Cold.ftp.username}"
+             password= "7223221" binary="true">
+			 <fileset dir= "${Cold.dir}"/>
+		</ftp> 
+		<echo message="================= deploy successfully =================" />
+	</target>
+
+    <!--
+	push to branches
+	-->
+	<target name="push">
+
+    </target>
+
+    <target name="clean">
+		<delete dir="${Cold.build.dir}"/>
+		<delete dir="${Cold.dir}/cold-min.js"/>
+    </target>
+
+</project>

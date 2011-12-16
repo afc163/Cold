@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>suggest</title>
+<style type="text/css">
+*{
+margin:0;
+padding:0;
+list-style:none;
+}
+a img{
+border:none;
+}
+body {
+margin:20px 100px 400px;
+}
+input {
+width:300px;
+height:28px;
+font-size:14px;
+line-height:28px;
+}
+p {
+margin:40px 0 15px;
+}
+.suggest-layer {
+	border:1px solid #999;
+	border-top:none;
+	background: #fff;
+}
+.suggest-item {
+	color: #555555;
+    display: none;
+    font-size: 14px;
+    height: 14px;
+    line-height: 14px;
+    margin: 0;
+    overflow: hidden;
+    padding: 6px 8px;
+}
+.suggest-selected-item {
+	background:#A2B7DB;
+}
+</style>
+<script type="text/javascript" src="../../cold/cold.js"></script>
+</head>
+
+<body>
+<p>搜索建议自动提示组件 - 淘宝</p>
+<input type="text" id="testinput1" />
+<p>搜索建议自动提示组件 - 百度</p>
+<input type="text" id="testinput2" />
+<p>搜索建议自动提示组件 - 有道</p>
+<input type="text" id="testinput3" />
+<p>搜索建议自动提示组件 - 谷歌</p>
+<input type="text" id="testinput4" />
+<p>搜索建议自动提示组件 - 必应</p>
+<input type="text" id="testinput5" />
+<p>搜索建议自动提示组件 - 搜狗</p>
+<input type="text" id="testinput6" />
+<p>搜索建议自动提示组件 - 一淘</p>
+<input type="text" id="testinput7" />
+<p>搜索建议自动提示组件 - 优酷</p>
+<input type="text" id="testinput8" />
+<p>搜索建议自动提示组件 - 雅虎</p>
+<input type="text" id="testinput9" />
+<p>搜索建议自动提示组件 - 土豆</p>
+<input type="text" id="testinput10" />
+
+<script type="text/javascript">
+Cold.load('app.suggest');
+Cold.ready(function() {
+	Cold.app.suggest({
+		inputId : 'testinput1',
+		url : 'http://suggest.taobao.com/sug',
+		sendData : {
+			code : 'utf-8',
+			extra : '1'
+		},
+		customData : function(data) {
+			return data.result;
+		}
+	});
+	Cold.app.suggest({
+		inputId : 'testinput2',
+		url : 'http://suggestion.baidu.com/su',
+		queryName : 'wd',
+		callbackKey : 'cb',
+		width : 400,
+		showStyle : 'fadeIn',
+		sendData : {
+			p : '3'
+		},
+		customData : function(data) {
+			return data.s;
+		}
+	});
+	//http://www.youdao.com/suggest2/suggest.s?query=f&keyfrom=web.index.suggest&o=aa&rn=10&h=15
+	Cold.app.suggest({
+		inputId : 'testinput3',
+		url : 'http://www.youdao.com/suggest2/suggest.s',
+		queryName : 'query',
+		showStyle : 'slideDown',		
+		callbackName : 'youdao.updateCall',
+		sendData : {
+			o : 'youdao',
+			h : '14',
+			rn : '10',
+			keyfrom : 'web.index.suggest'
+		},
+		customData : function(data) {
+			return data.r;
+		},
+		customItem : function(item) {
+			return { html : '<p>' + item.c + '</p>', content: item.c };
+		}
+	});
+	//https://clients1.google.com/complete/search?client=hp&hl=zh-CN&cp=1&gs_id=a&q=f&gs_gbg=GC00Pe31Ypx088c1h8f24BOm4
+	Cold.app.suggest({
+		inputId : 'testinput4',
+		url : 'https://clients1.google.com/complete/search',
+		queryName : 'q',
+		sendData : {
+			client : 'hp',
+			hl : 'zh-CN',
+			cp : '1',
+			gs_id : 'a'
+		},
+		customData : function(data) {
+			return data[1];
+		},
+		customItem : function(item) {
+			return { html : '<p>' + item[0] + '</p>', content: item[0] };
+		}
+	});
+	//http://bj1.api.bing.com/qsonhs.aspx?FORM=ASAPIH&mkt=zh-CN&type=cb&cb=sa_inst.apiCB&q=fs&cp=2&o=a
+	Cold.app.suggest({
+		inputId : 'testinput5',
+		url : 'http://bj1.api.bing.com/qsonhs.aspx',
+		queryName : 'q',
+		callbackKey : 'cb',
+		maxLength : 5,
+		sendData : {
+			mkt : 'zh-CN',
+			type : 'cb',
+			cp : '2',
+			o : 'a',
+			FORM : 'ASAPIH'
+		},
+		customData : function(data) {
+			return data.AS.Results[0].Suggests;
+		},
+		customItem : function(item) {
+			return { html : '<p>' + item['Txt'] + '</p>', content: item['Txt'] };
+		}
+	});
+	//http://sugg.sogou.com/sugg/ajaj_json.jsp?key=f&type=web&pr=web
+	Cold.app.suggest({
+		inputId : 'testinput6',
+		url : 'http://sugg.sogou.com/sugg/ajaj_json.jsp',
+		queryName : 'key',
+		callbackName : 'sogou.sug',
+		sendData : {
+			pr : 'web',
+			type : 'web'
+		},
+		customData : function(data) {
+			return data[1];
+		},
+		customItem : function(item) {
+			return { html : '<p>' + item + '</p>', content: item };
+		}
+	});
+	//http://suggest.taobao.com/sug?area=auction&code=utf-8&callback=KISSY.Suggest.callback&q=%E9%A3%9E%20
+	Cold.app.suggest({
+		inputId : 'testinput7',
+		url : 'http://suggest.taobao.com/sug',
+		queryName : 'q',
+		sendData : {
+			area : 'auction',
+			code : 'utf-8'
+		},
+		customData : function(data) {
+			return data.result;
+		},
+		customItem : function(item) {
+			return { html : '<p>' + item + '</p>', content: item };
+		}
+	});
+	//http://tip.so.youku.com/search_keys?k=%E9%A3%9E%E9%A3%9E&type=video
+	Cold.app.suggest({
+		inputId : 'testinput8',
+		url : 'http://tip.so.youku.com/search_keys',
+		queryName : 'k',
+		callbackName : 'showresult',		
+		sendData : {
+			type : 'video'
+		},
+		customData : function(data) {
+			return eval(data).result;
+		},
+		customItem : function(item) {
+			return { html : '<p>' + item.keyword + '</p>', content: item.keyword };
+		}
+	});
+	//http://sugg.search.yahoo.com/gossip-us-fp/?nresults=10&queryfirst=2&output=yjsonp&version=&command=yahoo.com
+	Cold.app.suggest({
+		inputId : 'testinput9',
+		url : 'http://sugg.search.yahoo.com/gossip-us-fp/',
+		queryName : 'command',
+		callbackName : 'yasearch',		
+		sendData : {
+			nresults : '10',
+			queryfirst : '2',
+			output : 'yjsonp'
+		},
+		customData : function(data) {
+			return data.r;
+		},
+		customItem : function(item) {
+			return { html : '<p>' + item[0] + '</p>', content: item[0] };
+		}
+	});
+	//http://hint.tudou.com/hint?q=s&type=programs&jsoncallback=tui_searchHint_handler
+	Cold.app.suggest({
+		inputId : 'testinput10',
+		url : 'http://hint.tudou.com/hint',
+		queryName : 'q',
+		callbackKey : 'jsoncallback',		
+		sendData : {
+			type : 'programs'
+		},
+		customData : function(data) {
+			return data;
+		},
+		customItem : function(item) {
+			return { html : '<p>' + item + '</p>', content: item };
+		}
+	});
+});
+</script>
+</body>
+</html>
+

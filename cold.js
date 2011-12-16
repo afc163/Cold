@@ -188,6 +188,27 @@
 			return Cold;
 		},
 		/** 
+		* 生成全局空间对象
+		* @type method
+		* @param {string} namespace 命名空间对象字符串
+		* @param {function} fn 生成的对象赋值
+		× @example
+		* Cold.namespace('obj.abc');
+		* @return Cold
+		*/
+		namespace : function(namespace, fn) {
+			var space = window, i, array = namespace.split('.');
+			for(i=0; i<array.length; i++) {
+				if(i == array.length - 1) {
+					space[array[i]] = fn;
+					return;
+				}
+				space[array[i]] = space[array[i]] || {};
+				space = space[array[i]];
+			}
+			return space;
+		},
+		/** 
 		* 依赖于某些模块的执行代码，不需要等到domReady就可以执行
 		* @type method
 		* @param {Array|Function} req 依赖模块表，或doFunc
@@ -307,6 +328,9 @@
 	* @type method
 	*/
 	Cold.log = ( Cold.DEBUG && window.console ) ? function(msg){ console.log(msg); } : function(){};
+
+	/* 用于保存某些数据 */
+	window['cold'] = {};
 
 	try{
 		document.domain = window.location.href.match(/http:\/\/(www\.)?([^\/]*)\//)[2];

@@ -1,5 +1,5 @@
 Cold.add("ajax", function(){
-
+	
 	var _jsonToQuery = function(data){
 		if(Cold.isString(data)){
 			return data;
@@ -40,6 +40,8 @@ Cold.add("ajax", function(){
         charset		: 'utf-8',
 		timeout		: 30 * 1000,
 		returnType	: 'json',	// json | xml | html | text | jsonp & script is undefined
+		callbackKey : 'callback',	//for josnp function
+		callbackName: null,			//for josnp function		
 		onSuccess	: function(){},
 		onError		: function(){}
 	};
@@ -119,6 +121,33 @@ Cold.add("ajax", function(){
 	var getScript = function(url, callback){
 	
 	};
+
+	var jsonp = function(url, option) {
+		if (url == '' || url == null) {
+			throw new Error('jsonp need parameter url.');
+		}
+		Cold.extend(option, _defaultOption);
+		if(option.callbackName) {
+			Cold.namespace(option.callbackName, option.onSuccess);
+		}
+		else {
+			//初始化callback回调
+			if (!cold.callbackIndex) {
+				cold.callbackIndex = 0;
+			}
+			cold.callbacks = Cold.cache.callbacks || {};
+			//绑定callback方法
+			cold.callbackIndex++;
+			var callbackName = 'jsonpcallback'+cold.callbackIndex;
+			cold.callbacks[callbackName] = option.onSuccess;
+		}
+		//拼装jsonp的url
+		option.data[option.callbackKey] = option.callbackName ? option.callbackName : ('cold.callbacks.' + callbackName);
+		option.data['rd'] = new Date().valueOf();
+		url = _addQuery(url, option.data);
+		//发送请求
+		return Cold.addScript(url);
+	};
 	
 	return {
 		getXHR		: getRequest,
@@ -127,7 +156,8 @@ Cold.add("ajax", function(){
 		post		: post,
 		getXml		: getXml,
 		getText		: getText,
-		getScript	: getScript
+		getScript	: getScript,
+		jsonp		: jsonp
 	};
 
 });
